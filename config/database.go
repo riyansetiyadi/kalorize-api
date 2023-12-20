@@ -6,10 +6,10 @@ import (
 )
 
 func InitDB() *gorm.DB {
-	host := "localhost"
-	port := "3307"
-	dbname := "kalorize"
-	username := "root"
+	host := ""
+	port := ""
+	dbname := ""
+	username := ""
 	password := ""
 
 	dsn := username + ":" + password + "@tcp(" + host + ":" + port + ")/" + dbname
