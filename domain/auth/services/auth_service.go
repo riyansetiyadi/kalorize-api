@@ -7,6 +7,7 @@ import (
 	"kalorize-api/utils"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
@@ -102,7 +103,10 @@ func (service *authService) Register(fullname, email, password, passwordConfirma
 	response.Data = map[string]interface{}{
 		"token": token,
 	}
+
+	uuid := uuid.New()
 	user = models.User{
+		IdUser:   uuid,
 		Fullname: fullname,
 		Email:    email,
 		Password: string(hashedPassword),

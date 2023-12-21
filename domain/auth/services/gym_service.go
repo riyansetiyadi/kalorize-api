@@ -4,6 +4,7 @@ import (
 	"kalorize-api/domain/auth/repositories"
 	"kalorize-api/utils"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -14,29 +15,30 @@ type GymService struct {
 }
 
 func (gymService *GymService) CheckGymCode(gymKode string) utils.Response {
-	kodeGym, err := gymService.gymKode.GetKodeGymByKode(gymKode)
+	kodeGym, err := gymService.gymKode.GetIDFromKode(gymKode)
 	if err != nil {
 		return utils.Response{StatusCode: 500, Messages: err.Error()}
 	}
 
-	if kodeGym.IdKodeGym == 0 {
+	emptyUUID := uuid.UUID{}
+	if kodeGym == emptyUUID {
 		return utils.Response{StatusCode: 404, Messages: "Kode Gym tidak ditemukan"}
 	}
 
-	if gymService.IsUsed(gymKode) {
+	if gymService.IsUsed(kodeGym) {
 		return utils.Response{StatusCode: 400, Messages: "Kode Gym sudah digunakan"}
 	}
 
 	return utils.Response{StatusCode: 200, Messages: "Kode Gym valid"}
 }
 
-func (gymService *GymService) IsUsed(idKode string) bool {
-	usedCode, err := gymService.gymUsedCode.GetUsedCodeByIdCode(idKode)
+func (gymService *GymService) IsUsed(kodeGym uuid.UUID) bool {
+	usedCode, err := gymService.gymUsedCode.GetUsedCodeByIdCode(kodeGym)
 	if err != nil {
 		return false
 	}
-
-	if usedCode.IdKode == "" {
+	emptyUUID := uuid.UUID{}
+	if usedCode.IdKode == emptyUUID {
 		return false
 	}
 

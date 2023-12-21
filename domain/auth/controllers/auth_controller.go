@@ -41,10 +41,10 @@ func (controller *AuthController) Login(c echo.Context) error {
 
 func (controller *AuthController) Register(c echo.Context) error {
 	type payload struct {
-		Fullname             string `json:"fullname" validate:"required"`
-		Email                string `json:"email" validate:"required,email"`
-		Password             string `json:"password" validate:"required"`
-		PasswordConfirmation string `json:"password_confirmation" validate:"required,eqfield=Password"`
+		NamaLengkap          string `json:"NamaLengkap" validate:"required"`
+		Email                string `json:"Email" validate:"required,email"`
+		Password             string `json:"Password" validate:"required"`
+		PasswordConfirmation string `json:"PasswordConfirmation" validate:"required,eqfield=Password"`
 	}
 
 	payloadValidator := new(payload)
@@ -57,7 +57,7 @@ func (controller *AuthController) Register(c echo.Context) error {
 		return c.JSON(400, err.Error())
 	}
 
-	response := controller.authService.Register(payloadValidator.Fullname, payloadValidator.Email, payloadValidator.Password, payloadValidator.PasswordConfirmation)
+	response := controller.authService.Register(payloadValidator.Email, payloadValidator.Email, payloadValidator.Password, payloadValidator.PasswordConfirmation)
 	return c.JSON(response.StatusCode, response)
 }
 

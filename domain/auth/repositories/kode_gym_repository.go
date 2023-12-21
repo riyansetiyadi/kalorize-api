@@ -3,6 +3,7 @@ package repositories
 import (
 	"kalorize-api/domain/auth/models"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -14,9 +15,16 @@ func (db *dbKodeGym) GetKodeGymByKode(kode string) (models.KodeGym, error) {
 	var kodeGym models.KodeGym
 	err := db.Conn.Where("kode_gym = ?", kode).First(&kodeGym).Error
 	if err != nil {
-		kodeGym.IdKodeGym = 0
+		emptyUUID := uuid.UUID{}
+		kodeGym.IdKodeGym = emptyUUID
 	}
 	return kodeGym, err
+}
+
+func (db *dbKodeGym) GetIDFromKode(kode string) (uuid.UUID, error) {
+	var kodeGym models.KodeGym
+	err := db.Conn.Where("kode_gym = ?", kode).First(&kodeGym).Error
+	return kodeGym.IdKodeGym, err
 }
 
 func (db *dbKodeGym) CreateNewKodeGym(kodeGym models.KodeGym) error {
@@ -43,6 +51,7 @@ type KodeGymRepository interface {
 	UpdateKodeGym(kodeGym models.KodeGym) error
 	DeleteKodeGym(idKodeGym int) error
 	GetKodeGymById(idKodeGym int) (models.KodeGym, error)
+	GetIDFromKode(kode string) (uuid.UUID, error)
 }
 
 func NewDBKodeGymRepository(conn *gorm.DB) *dbKodeGym {
