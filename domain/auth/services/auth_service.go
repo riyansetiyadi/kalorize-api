@@ -5,6 +5,7 @@ import (
 	"kalorize-api/domain/auth/models"
 	"kalorize-api/domain/auth/repositories"
 	"kalorize-api/utils"
+	"strings"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
@@ -32,6 +33,7 @@ func (service *authService) Login(email, password string) utils.Response {
 		return response
 	}
 	if !CheckPasswordHash(password, user.Password) {
+		fmt.Print(!CheckPasswordHash(password, user.Password))
 		response.StatusCode = 401
 		response.Messages = "Password kamu salah"
 		response.Data = nil
@@ -125,7 +127,7 @@ func (service *authService) Register(fullname, email, password, passwordConfirma
 
 func (service *authService) GetLoggedInUser(bearerToken string) utils.Response {
 	var response utils.Response
-
+	fmt.Println(bearerToken)
 	token, err := jwt.Parse(bearerToken, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
@@ -141,8 +143,19 @@ func (service *authService) GetLoggedInUser(bearerToken string) utils.Response {
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		email := claims["email"].(string)
+		fmt.Print(claims)
+		emailClaim := claims["Email"]
+		fmt.Println(emailClaim)
+		if emailClaim == nil {
+			response.StatusCode = 401
+			response.Messages = "Invalid token"
+			response.Data = nil
+			return response
+		}
+
+		email := emailClaim.(string)
 		user, err := service.authRepo.GetUserByEmail(email)
+		fmt.Println(user)
 		if err != nil {
 			response.StatusCode = 500
 			response.Messages = "User tidak ditemukan"
@@ -152,7 +165,14 @@ func (service *authService) GetLoggedInUser(bearerToken string) utils.Response {
 
 		response.StatusCode = 200
 		response.Messages = "success"
-		response.Data = user
+		names := strings.Split(user.Fullname, " ")
+		firstname := names[0]
+		lastname := names[1]
+
+		response.Data = map[string]string{
+			"firstName": firstname,
+			"lastName":  lastname,
+		}
 		return response
 	} else {
 		response.StatusCode = 401

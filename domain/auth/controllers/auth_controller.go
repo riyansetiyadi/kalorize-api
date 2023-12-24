@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"kalorize-api/domain/auth/services"
 	"strings"
 
@@ -63,13 +64,12 @@ func (controller *AuthController) Register(c echo.Context) error {
 
 func (controller *AuthController) GetUser(c echo.Context) error {
 	authorizationHeader := c.Request().Header.Get("Authorization")
-
 	if authorizationHeader == "" || !strings.HasPrefix(authorizationHeader, "Bearer ") {
 		return c.JSON(401, "Unauthorized")
 	}
 
 	token := strings.TrimPrefix(authorizationHeader, "Bearer ")
-
+	fmt.Print("token", token)
 	response := controller.authService.GetLoggedInUser(token)
 	return c.JSON(response.StatusCode, response)
 }
