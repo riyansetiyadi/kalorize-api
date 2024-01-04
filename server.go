@@ -13,6 +13,7 @@ func main() {
 	// Route
 	route, e := routes.Init()
 	routes.RouteAuth(route, db)
+	routes.RouteMakanan(route, db)
 
 	// Start server
 	port := 8080

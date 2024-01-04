@@ -12,7 +12,7 @@ func InitDB() *gorm.DB {
 	username := "root"
 	password := ""
 
-	dsn := username + ":" + password + "@tcp(" + host + ":" + port + ")/" + dbname
+	dsn := username + ":" + password + "@tcp(" + host + ":" + port + ")/" + dbname + "?parseTime=true"
 
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{SkipDefaultTransaction: true})
 

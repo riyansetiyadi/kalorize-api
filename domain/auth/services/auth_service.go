@@ -169,9 +169,16 @@ func (service *authService) GetLoggedInUser(bearerToken string) utils.Response {
 		firstname := names[0]
 		lastname := names[1]
 
-		response.Data = map[string]string{
-			"firstName": firstname,
-			"lastName":  lastname,
+		response.Data = map[string]interface{}{
+			"firstName":    firstname,
+			"lastName":     lastname,
+			"email":        user.Email,
+			"jenisKelamin": user.JenisKelamin,
+			"frekuensiGym": user.FrekuensiGym,
+			"targetKalori": user.TargetKalori,
+			"tinggiBadan":  user.TinggiBadan,
+			"umur":         user.Umur,
+			"beratBadan":   user.BeratBadan,
 		}
 		return response
 	} else {
