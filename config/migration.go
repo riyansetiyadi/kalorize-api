@@ -1,7 +1,7 @@
 package config
 
 import (
-	"kalorize-api/domain/auth/models"
+	"kalorize-api/domain/models"
 
 	"gorm.io/gorm"
 )
