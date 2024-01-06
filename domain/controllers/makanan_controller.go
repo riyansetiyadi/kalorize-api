@@ -24,12 +24,19 @@ func NewMakananController(db *gorm.DB) MakananController {
 	return controller
 }
 
+func (controller *MakananController) GetMakananCSV(c echo.Context) error {
+
+	c.Response().Header().Set("Content-Type", "text/csv")
+	c.Response().Header().Set("Content-Disposition", "attachment; filename=makanan.csv")
+	controller.makananService.GetMakananCSV(c)
+	return nil
+}
+
 func (controller *MakananController) GetAllMakanan(c echo.Context) error {
 	authorizationHeader := c.Request().Header.Get("Authorization")
 	if authorizationHeader == "" || !strings.HasPrefix(authorizationHeader, "Bearer ") {
 		return c.JSON(401, "Unauthorized")
 	}
-	fmt.Print("masuk controller")
 	response := controller.makananService.GetAllMakanan()
 	return c.JSON(response.StatusCode, response)
 }

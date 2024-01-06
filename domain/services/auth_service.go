@@ -32,8 +32,8 @@ func (service *authService) Login(email, password string) utils.Response {
 		response.Data = nil
 		return response
 	}
-	if !CheckPasswordHash(password, user.Password) {
-		fmt.Print(!CheckPasswordHash(password, user.Password))
+	if !utils.CheckPasswordHash(password, user.Password) {
+		fmt.Print(!utils.CheckPasswordHash(password, user.Password))
 		response.StatusCode = 401
 		response.Messages = "Password kamu salah"
 		response.Data = nil
@@ -56,15 +56,15 @@ func (service *authService) Login(email, password string) utils.Response {
 
 }
 
-func (service *authService) Register(fullname, email, password, passwordConfirmation string) utils.Response {
+func (service *authService) Register(registerRequest utils.RegisterRequest) utils.Response {
 	var response utils.Response
-	if fullname == "" || email == "" || password == "" || passwordConfirmation == "" {
+	if registerRequest.Fullname == "" || registerRequest.Email == "" || registerRequest.Password == "" || registerRequest.PasswordConfirmation == "" {
 		response.StatusCode = 400
 		response.Messages = "Semua field harus diisi"
 		response.Data = nil
 		return response
 	}
-	user, err := service.authRepo.GetUserByEmail(email)
+	user, err := service.authRepo.GetUserByEmail(registerRequest.Email)
 	if err == nil {
 		response.StatusCode = 400
 		response.Messages = "Email sudah terdaftar"
@@ -72,29 +72,28 @@ func (service *authService) Register(fullname, email, password, passwordConfirma
 		return response
 	}
 
-	//check wether the email is valid or not
-	if !utils.IsEmailValid(email) {
+	if !utils.IsEmailValid(registerRequest.Email) {
 		response.StatusCode = 400
 		response.Messages = "Email kamu tidak valid"
 		response.Data = nil
 		return response
 	}
 
-	if password != passwordConfirmation {
+	if registerRequest.Password != registerRequest.PasswordConfirmation {
 		response.StatusCode = 400
 		response.Messages = "Password dan konfirmasi password tidak sama"
 		response.Data = nil
 		return response
 	}
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(registerRequest.Password), bcrypt.DefaultCost)
 	if err != nil {
 		response.StatusCode = 500
 		response.Messages = "Password hashing failed"
 		response.Data = nil
 		return response
 	}
-	token, err := utils.GenerateJWTToken(fullname, email, "kalorize")
+	token, err := utils.GenerateJWTToken(registerRequest.Fullname, registerRequest.Email, "kalorize")
 	if err != nil {
 		response.StatusCode = 500
 		response.Messages = "Token generation failed"
@@ -105,13 +104,19 @@ func (service *authService) Register(fullname, email, password, passwordConfirma
 	response.Data = map[string]interface{}{
 		"token": token,
 	}
-
 	uuid := uuid.New()
 	user = models.User{
-		IdUser:   uuid,
-		Fullname: fullname,
-		Email:    email,
-		Password: string(hashedPassword),
+		IdUser:       uuid,
+		Fullname:     registerRequest.Fullname,
+		Email:        registerRequest.Email,
+		Umur:         registerRequest.Umur,
+		BeratBadan:   registerRequest.BeratBadan,
+		TinggiBadan:  registerRequest.TinggiBadan,
+		FrekuensiGym: registerRequest.FrekuensiGym,
+		TargetKalori: registerRequest.TargetKalori,
+		JenisKelamin: registerRequest.JenisKelamin,
+		ReferalCode:  utils.GenerateReferalCode(registerRequest.Fullname),
+		Password:     string(hashedPassword),
 	}
 	err = service.authRepo.CreateNewUser(user)
 	if err != nil {
@@ -189,14 +194,9 @@ func (service *authService) GetLoggedInUser(bearerToken string) utils.Response {
 	}
 }
 
-func CheckPasswordHash(password, hash string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-	return err == nil
-}
-
 type AuthService interface {
 	Login(username, password string) utils.Response
-	Register(fullname, email, password, passwordConfirmation string) utils.Response
+	Register(requestRegister utils.RegisterRequest) utils.Response
 	GetLoggedInUser(bearerToken string) utils.Response
 }
 

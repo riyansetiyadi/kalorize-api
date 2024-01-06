@@ -42,7 +42,7 @@ func InitDB() *gorm.DB {
 
 	dsn := username + ":" + password + "@tcp(" + host + ":" + port + ")/" + dbname + "?parseTime=true"
 	fmt.Println(dsn)
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{SkipDefaultTransaction: true})
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{SkipDefaultTransaction: true, PrepareStmt: true})
 
 	if err != nil {
 		panic("Can't connect to database")

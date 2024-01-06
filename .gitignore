@@ -1,3 +1,5 @@
+# Ignore vendor directory
 vendor/
+
+# Ignore config.yaml file
 config.yaml
-```

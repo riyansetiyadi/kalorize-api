@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"kalorize-api/domain/services"
+	"kalorize-api/utils"
 	"strings"
 
 	vl "github.com/go-playground/validator/v10"
@@ -46,6 +47,13 @@ func (controller *AuthController) Register(c echo.Context) error {
 		Email                string `json:"Email" validate:"required,email"`
 		Password             string `json:"Password" validate:"required"`
 		PasswordConfirmation string `json:"PasswordConfirmation" validate:"required,eqfield=Password"`
+		JenisKelamin         string `json:"JenisKelamin" validate:"required"`
+		Umur                 int    `json:"Umur" validate:"required"`
+		BeratBadan           int    `json:"BeratBadan" validate:"required"`
+		TinggiBadan          int    `json:"TinggiBadan" validate:"required"`
+		FrekuensiGym         int    `json:"FrekuensiGym" validate:"required"`
+		TargetKalori         int    `json:"TargetKalori" validate:"required"`
+		ReferalCode          string `json:"ReferalCode" validate:"required"`
 	}
 
 	payloadValidator := new(payload)
@@ -57,8 +65,20 @@ func (controller *AuthController) Register(c echo.Context) error {
 	if err := controller.validate.Struct(payloadValidator); err != nil {
 		return c.JSON(400, err.Error())
 	}
+	var regisPayload utils.RegisterRequest = utils.RegisterRequest{
+		Fullname:             payloadValidator.NamaLengkap,
+		Email:                payloadValidator.Email,
+		Password:             payloadValidator.Password,
+		PasswordConfirmation: payloadValidator.PasswordConfirmation,
+		JenisKelamin:         payloadValidator.JenisKelamin,
+		Umur:                 payloadValidator.Umur,
+		BeratBadan:           payloadValidator.BeratBadan,
+		TinggiBadan:          payloadValidator.TinggiBadan,
+		FrekuensiGym:         payloadValidator.FrekuensiGym,
+		TargetKalori:         payloadValidator.TargetKalori,
+	}
 
-	response := controller.authService.Register(payloadValidator.Email, payloadValidator.Email, payloadValidator.Password, payloadValidator.PasswordConfirmation)
+	response := controller.authService.Register(regisPayload)
 	return c.JSON(response.StatusCode, response)
 }
 

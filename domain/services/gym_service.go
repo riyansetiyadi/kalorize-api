@@ -4,7 +4,6 @@ import (
 	"kalorize-api/domain/repositories"
 	"kalorize-api/utils"
 
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -20,8 +19,7 @@ func (gymService *GymService) CheckGymCode(gymKode string) utils.Response {
 		return utils.Response{StatusCode: 500, Messages: err.Error()}
 	}
 
-	emptyUUID := uuid.UUID{}
-	if kodeGym == emptyUUID {
+	if kodeGym == 0 {
 		return utils.Response{StatusCode: 404, Messages: "Kode Gym tidak ditemukan"}
 	}
 
@@ -32,12 +30,12 @@ func (gymService *GymService) CheckGymCode(gymKode string) utils.Response {
 	return utils.Response{StatusCode: 200, Messages: "Kode Gym valid"}
 }
 
-func (gymService *GymService) IsUsed(kodeGym uuid.UUID) bool {
-	usedCode, err := gymService.gymUsedCode.GetUsedCodeByIdCode(kodeGym)
+func (gymService *GymService) IsUsed(gymCode int) bool {
+	usedCode, err := gymService.gymUsedCode.GetUsedCodeByIdCode(gymCode)
 	if err != nil {
 		return false
 	}
-	emptyUUID := uuid.UUID{}
+	emptyUUID := 0
 	if usedCode.IdKode == emptyUUID {
 		return false
 	}

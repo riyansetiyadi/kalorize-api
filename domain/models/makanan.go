@@ -7,7 +7,7 @@ import (
 )
 
 type Makanan struct {
-	ID          string      `json:"id_makanan" gorm:"column:id_makanan;primary_key;type:char(6);"`
+	IdMakanan   int         `json:"id_makanan" gorm:"column:id_makanan;primary_key;type:char(6);"`
 	Nama        string      `json:"nama" gorm:"column:nama;type:varchar(255);"`
 	Jenis       string      `json:"jenis" gorm:"column:jenis;type:varchar(255);"`
 	Kalori      int         `json:"kalori" gorm:"column:kalori;type:int;"`
@@ -24,6 +24,12 @@ func (m *Makanan) TableName() string {
 
 type TimeWrapper struct {
 	time.Time
+}
+
+func ToCSV() [][]string {
+	return [][]string{
+		{"id_makanan", "nama", "jenis", "kalori", "protein", "bahan", "cooking_step", "created_at", "updated_at"},
+	}
 }
 
 func (tw *TimeWrapper) Scan(value interface{}) error {
