@@ -43,17 +43,12 @@ func (controller *AuthController) Login(c echo.Context) error {
 
 func (controller *AuthController) Register(c echo.Context) error {
 	type payload struct {
-		NamaLengkap          string `json:"NamaLengkap" validate:"required"`
-		Email                string `json:"Email" validate:"required,email"`
-		Password             string `json:"Password" validate:"required"`
-		PasswordConfirmation string `json:"PasswordConfirmation" validate:"required,eqfield=Password"`
-		JenisKelamin         string `json:"JenisKelamin" validate:"required"`
-		Umur                 int    `json:"Umur" validate:"required"`
-		BeratBadan           int    `json:"BeratBadan" validate:"required"`
-		TinggiBadan          int    `json:"TinggiBadan" validate:"required"`
-		FrekuensiGym         int    `json:"FrekuensiGym" validate:"required"`
-		TargetKalori         int    `json:"TargetKalori" validate:"required"`
-		ReferalCode          string `json:"ReferalCode" validate:"required"`
+		NamaLengkap          string `json:"namaLengkap" validate:"required"`
+		Email                string `json:"email" validate:"required,email"`
+		Password             string `json:"password" validate:"required"`
+		PasswordConfirmation string `json:"passwordConfirmation" validate:"required,eqfield=Password"`
+		GymKode              string `json:"gymKode" validate:"required"`
+		ReferalCode          string `json:"referalCode"`
 	}
 
 	payloadValidator := new(payload)
@@ -65,20 +60,15 @@ func (controller *AuthController) Register(c echo.Context) error {
 	if err := controller.validate.Struct(payloadValidator); err != nil {
 		return c.JSON(400, err.Error())
 	}
-	var regisPayload utils.RegisterRequest = utils.RegisterRequest{
+	var regisPayload utils.UserRequest = utils.UserRequest{
 		Fullname:             payloadValidator.NamaLengkap,
 		Email:                payloadValidator.Email,
 		Password:             payloadValidator.Password,
 		PasswordConfirmation: payloadValidator.PasswordConfirmation,
-		JenisKelamin:         payloadValidator.JenisKelamin,
-		Umur:                 payloadValidator.Umur,
-		BeratBadan:           payloadValidator.BeratBadan,
-		TinggiBadan:          payloadValidator.TinggiBadan,
-		FrekuensiGym:         payloadValidator.FrekuensiGym,
-		TargetKalori:         payloadValidator.TargetKalori,
+		ReferalCode:          payloadValidator.ReferalCode,
 	}
 
-	response := controller.authService.Register(regisPayload)
+	response := controller.authService.Register(regisPayload, payloadValidator.GymKode)
 	return c.JSON(response.StatusCode, response)
 }
 

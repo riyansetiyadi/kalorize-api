@@ -14,7 +14,8 @@ import (
 )
 
 type authService struct {
-	authRepo repositories.AuthRepository
+	authRepo     repositories.UserRepository
+	usedCodeRepo repositories.UsedCodeRepository
 }
 
 func (service *authService) Login(email, password string) utils.Response {
@@ -25,6 +26,14 @@ func (service *authService) Login(email, password string) utils.Response {
 		response.Data = nil
 		return response
 	}
+
+	if !utils.IsEmailValid(email) {
+		response.StatusCode = 400
+		response.Messages = "Email kamu tidak valid"
+		response.Data = nil
+		return response
+	}
+
 	user, err := service.authRepo.GetUserByEmail(email)
 	if err != nil {
 		response.StatusCode = 401
@@ -39,7 +48,7 @@ func (service *authService) Login(email, password string) utils.Response {
 		response.Data = nil
 		return response
 	}
-	token, err := utils.GenerateJWTToken(user.Fullname, user.Email, "kalorize")
+	token, err := utils.GenerateJWTToken(user.Fullname, user.Email, user.Role, "kalorize")
 	if err != nil {
 		response.StatusCode = 500
 		response.Messages = "Token generation failed"
@@ -51,12 +60,12 @@ func (service *authService) Login(email, password string) utils.Response {
 
 	response.Data = map[string]interface{}{
 		"token": token,
+		"role":  user.Role,
 	}
 	return response
-
 }
 
-func (service *authService) Register(registerRequest utils.RegisterRequest) utils.Response {
+func (service *authService) Register(registerRequest utils.UserRequest, gymKode string) utils.Response {
 	var response utils.Response
 	if registerRequest.Fullname == "" || registerRequest.Email == "" || registerRequest.Password == "" || registerRequest.PasswordConfirmation == "" {
 		response.StatusCode = 400
@@ -79,6 +88,10 @@ func (service *authService) Register(registerRequest utils.RegisterRequest) util
 		return response
 	}
 
+	// if service.authRepo.FindReferalCodeIfExist(registerRequest.ReferalCode) == true {
+	// 	adain special service untuk user
+	// }
+
 	if registerRequest.Password != registerRequest.PasswordConfirmation {
 		response.StatusCode = 400
 		response.Messages = "Password dan konfirmasi password tidak sama"
@@ -93,36 +106,35 @@ func (service *authService) Register(registerRequest utils.RegisterRequest) util
 		response.Data = nil
 		return response
 	}
-	token, err := utils.GenerateJWTToken(registerRequest.Fullname, registerRequest.Email, "kalorize")
+	token, err := utils.GenerateJWTToken(registerRequest.Fullname, registerRequest.Email, registerRequest.Role, "kalorize")
 	if err != nil {
 		response.StatusCode = 500
 		response.Messages = "Token generation failed"
 		response.Data = nil
 		return response
 	}
-
 	response.Data = map[string]interface{}{
 		"token": token,
 	}
 	uuid := uuid.New()
 	user = models.User{
-		IdUser:       uuid,
-		Fullname:     registerRequest.Fullname,
-		Email:        registerRequest.Email,
-		Umur:         registerRequest.Umur,
-		BeratBadan:   registerRequest.BeratBadan,
-		TinggiBadan:  registerRequest.TinggiBadan,
-		FrekuensiGym: registerRequest.FrekuensiGym,
-		TargetKalori: registerRequest.TargetKalori,
-		JenisKelamin: registerRequest.JenisKelamin,
-		ReferalCode:  utils.GenerateReferalCode(registerRequest.Fullname),
-		Password:     string(hashedPassword),
+		IdUser:      uuid,
+		Fullname:    registerRequest.Fullname,
+		Email:       registerRequest.Email,
+		Umur:        registerRequest.Umur,
+		ReferalCode: utils.GenerateReferalCode(registerRequest.Fullname),
+		Password:    string(hashedPassword),
 	}
+	usedCode := models.UsedCode{
+		KodeGym: gymKode,
+		IdUser:  user.IdUser,
+	}
+	err = service.usedCodeRepo.CreateNewUsedCode(usedCode)
 	err = service.authRepo.CreateNewUser(user)
 	if err != nil {
 		response.StatusCode = 500
 		response.Messages = "User creation failed"
-		response.Data = nil
+		response.Data = user.IdUser
 		return response
 	}
 	response.StatusCode = 200
@@ -196,10 +208,10 @@ func (service *authService) GetLoggedInUser(bearerToken string) utils.Response {
 
 type AuthService interface {
 	Login(username, password string) utils.Response
-	Register(requestRegister utils.RegisterRequest) utils.Response
+	Register(requestRegister utils.UserRequest, gymKode string) utils.Response
 	GetLoggedInUser(bearerToken string) utils.Response
 }
 
 func NewAuthService(db *gorm.DB) AuthService {
-	return &authService{authRepo: repositories.NewDBAuthRepository(db)}
+	return &authService{authRepo: repositories.NewDBUserRepository(db)}
 }

@@ -14,29 +14,28 @@ type GymService struct {
 }
 
 func (gymService *GymService) CheckGymCode(gymKode string) utils.Response {
-	kodeGym, err := gymService.gymKode.GetIDFromKode(gymKode)
+	kodeGym, err := gymService.gymKode.GetKodeGymByKode(gymKode)
 	if err != nil {
 		return utils.Response{StatusCode: 500, Messages: err.Error()}
 	}
 
-	if kodeGym == 0 {
+	if kodeGym.KodeGym == "" {
 		return utils.Response{StatusCode: 404, Messages: "Kode Gym tidak ditemukan"}
 	}
 
-	if gymService.IsUsed(kodeGym) {
+	if gymService.IsUsed(kodeGym.KodeGym) {
 		return utils.Response{StatusCode: 400, Messages: "Kode Gym sudah digunakan"}
 	}
 
 	return utils.Response{StatusCode: 200, Messages: "Kode Gym valid"}
 }
 
-func (gymService *GymService) IsUsed(gymCode int) bool {
-	usedCode, err := gymService.gymUsedCode.GetUsedCodeByIdCode(gymCode)
+func (gymService *GymService) IsUsed(gymCode string) bool {
+	usedCode, err := gymService.gymUsedCode.GetUsedCodeByGymCode(gymCode)
 	if err != nil {
 		return false
 	}
-	emptyUUID := 0
-	if usedCode.IdKode == emptyUUID {
+	if usedCode.KodeGym == "" {
 		return false
 	}
 
