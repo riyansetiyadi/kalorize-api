@@ -25,13 +25,7 @@ func (m *Makanan) TableName() string {
 type TimeWrapper struct {
 	time.Time
 }
-
-func ToCSV() [][]string {
-	return [][]string{
-		{"id_makanan", "nama", "jenis", "kalori", "protein", "bahan", "cooking_step", "created_at", "updated_at"},
-	}
-}
-
+	
 func (tw *TimeWrapper) Scan(value interface{}) error {
 	if value == nil {
 		tw.Time = time.Time{}

@@ -60,7 +60,7 @@ func (controller *AuthController) Register(c echo.Context) error {
 	if err := controller.validate.Struct(payloadValidator); err != nil {
 		return c.JSON(400, err.Error())
 	}
-	var regisPayload utils.UserRequest = utils.UserRequest{
+	var regisUserPayload utils.UserRequest = utils.UserRequest{
 		Fullname:             payloadValidator.NamaLengkap,
 		Email:                payloadValidator.Email,
 		Password:             payloadValidator.Password,
@@ -68,7 +68,7 @@ func (controller *AuthController) Register(c echo.Context) error {
 		ReferalCode:          payloadValidator.ReferalCode,
 	}
 
-	response := controller.authService.Register(regisPayload, payloadValidator.GymKode)
+	response := controller.authService.Register(regisUserPayload, payloadValidator.GymKode)
 	return c.JSON(response.StatusCode, response)
 }
 

@@ -7,7 +7,6 @@ import (
 	"kalorize-api/utils"
 	"strings"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -144,35 +143,9 @@ func (service *authService) Register(registerRequest utils.UserRequest, gymKode 
 
 func (service *authService) GetLoggedInUser(bearerToken string) utils.Response {
 	var response utils.Response
-	fmt.Println(bearerToken)
-	token, err := jwt.Parse(bearerToken, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-		return []byte("kalorize"), nil
-	})
-
-	if err != nil {
-		response.StatusCode = 401
-		response.Messages = "Invalid token"
-		response.Data = nil
-		return response
-	}
-
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		fmt.Print(claims)
-		emailClaim := claims["Email"]
-		fmt.Println(emailClaim)
-		if emailClaim == nil {
-			response.StatusCode = 401
-			response.Messages = "Invalid token"
-			response.Data = nil
-			return response
-		}
-
-		email := emailClaim.(string)
+	email, err := utils.ParseData(bearerToken)
+	if email != "" && err == nil {
 		user, err := service.authRepo.GetUserByEmail(email)
-		fmt.Println(user)
 		if err != nil {
 			response.StatusCode = 500
 			response.Messages = "User tidak ditemukan"
@@ -196,6 +169,7 @@ func (service *authService) GetLoggedInUser(bearerToken string) utils.Response {
 			"tinggiBadan":  user.TinggiBadan,
 			"umur":         user.Umur,
 			"beratBadan":   user.BeratBadan,
+			"role":         user.Role,
 		}
 		return response
 	} else {
