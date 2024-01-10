@@ -29,6 +29,7 @@ func (controller *AdminController) RegisterGym(c echo.Context) error {
 	if authorizationHeader == "" || !strings.HasPrefix(authorizationHeader, "Bearer ") {
 		return c.JSON(401, "Unauthorized")
 	}
+	token := strings.TrimPrefix(authorizationHeader, "Bearer ")
 	type payload struct {
 		NamaGym      string `json:"namaGym" validate:"required"`
 		AlamatGym    string `json:"alamatGym" validate:"required"`
@@ -52,7 +53,7 @@ func (controller *AdminController) RegisterGym(c echo.Context) error {
 		NoTeleponGym: payloadValidator.NoTeleponGym,
 	}
 
-	response := controller.adminService.RegisterGym(authorizationHeader, registGymPayload)
+	response := controller.adminService.RegisterGym(token, registGymPayload)
 	return c.JSON(response.StatusCode, response)
 }
 
@@ -61,13 +62,16 @@ func (controller *AdminController) RegisterFranchise(c echo.Context) error {
 	if authorizationHeader == "" || !strings.HasPrefix(authorizationHeader, "Bearer ") {
 		return c.JSON(401, "Unauthorized")
 	}
+	token := strings.TrimPrefix(authorizationHeader, "Bearer ")
 	type payload struct {
-		NamaFranchise      string `json:"namaFranchise" validate:"required"`
-		AlamatFranchise    string `json:"alamatFranchise" validate:"required"`
-		
-		EmailFranchise     string `json:"emailFranchise" validate:"required,email"`
-		PasswordFranchise  string `json:"passwordFranchise" validate:"required"`
-		NoTeleponFranchise string `json:"noTeleponFranchise" validate:"required"`
+		NamaFranchise      string  `json:"namaFranchise" validate:"required"`
+		LongitudeFranchise float64 `json:"longitudeFranchise" validate:"required"`
+		LatitudeFranchise  float64 `json:"latitudeFranchise" validate:"required"`
+		EmailFranchise     string  `json:"emailFranchise" validate:"required,email"`
+		PasswordFranchise  string  `json:"passwordFranchise" validate:"required"`
+		NoTeleponFranchise string  `json:"noTeleponFranchise" validate:"required"`
+		FotoFranchise      string  `json:"fotoFranchise" validate:"required"`
+		LokasiFranchise    string  `json:"lokasiFranchise" validate:"required"`
 	}
 	payloadValidator := new(payload)
 	if err := c.Bind(payloadValidator); err != nil {
@@ -79,12 +83,15 @@ func (controller *AdminController) RegisterFranchise(c echo.Context) error {
 	}
 	var registerFranchisePayload utils.FranchiseRequest = utils.FranchiseRequest{
 		NamaFranchise:      payloadValidator.NamaFranchise,
-		AlamatFranchise:    payloadValidator.AlamatFranchise,
 		EmailFranchise:     payloadValidator.EmailFranchise,
 		PasswordFranchise:  payloadValidator.PasswordFranchise,
 		NoTeleponFranchise: payloadValidator.NoTeleponFranchise,
+		LongitudeFranchise: payloadValidator.LongitudeFranchise,
+		LatitudeFranchise:  payloadValidator.LatitudeFranchise,
+		FotoFranchise:      payloadValidator.FotoFranchise,
+		LokasiFranchise:    payloadValidator.LokasiFranchise,
 	}
-	response := controller.adminService.RegisterFranchise(authorizationHeader, registerFranchisePayload)
+	response := controller.adminService.RegisterFranchise(token, registerFranchisePayload)
 	return c.JSON(response.StatusCode, response)
 }
 
@@ -93,6 +100,7 @@ func (controller *AdminController) RegisterMakanan(c echo.Context) error {
 	if authorizationHeader == "" || !strings.HasPrefix(authorizationHeader, "Bearer ") {
 		return c.JSON(401, "Unauthorized")
 	}
+	token := strings.TrimPrefix(authorizationHeader, "Bearer ")
 	type payload struct {
 		NamaMakanan  string   `json:"namaMakanan" validate:"required"`
 		Kalori       int      `json:"kalori" validate:"required"`
@@ -116,6 +124,6 @@ func (controller *AdminController) RegisterMakanan(c echo.Context) error {
 		Bahan:       payloadValidator.Bahan,
 		CookingStep: payloadValidator.CookingStep,
 	}
-	response := controller.adminService.RegisterMakanan(authorizationHeader, registerMakananPayload)
+	response := controller.adminService.RegisterMakanan(token, registerMakananPayload)
 	return c.JSON(response.StatusCode, response)
 }

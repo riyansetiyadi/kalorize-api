@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"kalorize-api/domain/services"
+	"strings"
 
 	vl "github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
@@ -24,6 +25,12 @@ func NewGymOwnerController(db *gorm.DB) GymOwnerController {
 }
 
 func (controller *GymOwnerController) GenerateKodeGym(c echo.Context) error {
+
+	authorizationHeader := c.Request().Header.Get("Authorization")
+	if authorizationHeader == "" || !strings.HasPrefix(authorizationHeader, "Bearer ") {
+		return c.JSON(401, "Unauthorized")
+	}
+
 	type payload struct {
 		IdGym uuid.UUID `json:"idGym" validate:"required"`
 	}

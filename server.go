@@ -8,7 +8,7 @@ import (
 
 func main() {
 	db := config.InitDB()
-	//config.AutoMigration(db)
+	config.AutoMigration(db)
 
 	// Route
 	route, e := routes.Init()

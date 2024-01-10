@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -19,9 +21,20 @@ type adminService struct {
 	franchiseRepo repositories.FranchiseRepository
 }
 
-func (service *adminService) RegisterGym(bearerToken string, registGymRequest utils.GymRequest) utils.Response {
+func NewAdminService(db *gorm.DB) AdminService {
+	return &adminService{
+		userRepo:      repositories.NewDBUserRepository(db),
+		gymRepo:       repositories.NewDBGymRepository(db),
+		gymKode:       repositories.NewDBKodeGymRepository(db),
+		gymUsedCode:   repositories.NewDBUsedCodeRepository(db),
+		makananRepo:   repositories.NewDBMakananRepository(db),
+		franchiseRepo: repositories.NewDBFranchiseRepository(db),
+	}
+}
+
+func (service *adminService) RegisterGym(token string, registGymRequest utils.GymRequest) utils.Response {
 	var response utils.Response
-	adminEmail, err := utils.ParseData(bearerToken)
+	adminEmail, err := utils.ParseData(token)
 	if adminEmail == "" || err != nil {
 		response.StatusCode = 401
 		response.Messages = "Unauthorized"
@@ -35,17 +48,34 @@ func (service *adminService) RegisterGym(bearerToken string, registGymRequest ut
 		response.Data = nil
 		return response
 	}
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(registGymRequest.PasswordGym), bcrypt.DefaultCost)
+	if err != nil {
+		response.StatusCode = 500
+		response.Messages = "Password hashing failed"
+		response.Data = nil
+		return response
+	}
+
 	gym := models.Gym{
+		IdGym:        uuid.New(),
 		NamaGym:      registGymRequest.NamaGym,
 		AlamatGym:    registGymRequest.AlamatGym,
 		EmailGym:     registGymRequest.EmailGym,
-		PasswordGym:  registGymRequest.PasswordGym,
+		PasswordGym:  string(hashedPassword),
 		NoTeleponGym: registGymRequest.NoTeleponGym,
 	}
-
 	err = service.gymRepo.CreateNewGym(gym)
+	if err != nil {
+		response.StatusCode = 500
+		response.Messages = "Failed to create gym"
+		response.Data = nil
+		return response
+	}
 
-	return utils.Response{}
+	response.StatusCode = 200
+	response.Messages = "Success"
+	response.Data = gym
+	return response
 }
 
 func (service *adminService) RegisterFranchise(bearerToken string, registerFranchiseRequest utils.FranchiseRequest) utils.Response {
@@ -64,15 +94,36 @@ func (service *adminService) RegisterFranchise(bearerToken string, registerFranc
 		response.Data = nil
 		return response
 	}
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(registerFranchiseRequest.PasswordFranchise), bcrypt.DefaultCost)
+	if err != nil {
+		response.StatusCode = 500
+		response.Messages = "Password hashing failed"
+		response.Data = nil
+		return response
+	}
+
 	franchise := models.Franchise{
+		IdFranchise:        uuid.New(),
 		NamaFranchise:      registerFranchiseRequest.NamaFranchise,
-		AlamatFranchise:    registerFranchiseRequest.AlamatFranchise,
 		EmailFranchise:     registerFranchiseRequest.EmailFranchise,
-		PasswordFranchise:  registerFranchiseRequest.PasswordFranchise,
+		LongitudeFranchise: registerFranchiseRequest.LongitudeFranchise,
+		LatitudeFranchise:  registerFranchiseRequest.LatitudeFranchise,
+		LokasiFranchise:    registerFranchiseRequest.LokasiFranchise,
+		FotoFranchise:      registerFranchiseRequest.FotoFranchise,
+		PasswordFranchise:  string(hashedPassword),
 		NoTeleponFranchise: registerFranchiseRequest.NoTeleponFranchise,
 	}
 	err = service.franchiseRepo.CreateFranchise(franchise)
-	return utils.Response{}
+	if err != nil {
+		response.StatusCode = 500
+		response.Messages = "Failed to create franchise"
+		response.Data = nil
+		return response
+	}
+	response.StatusCode = 200
+	response.Messages = "Success"
+	response.Data = franchise
+	return response
 }
 
 func (service *adminService) RegisterMakanan(bearerToken string, registMakananRequest utils.MakananRequest) utils.Response {
@@ -98,25 +149,24 @@ func (service *adminService) RegisterMakanan(bearerToken string, registMakananRe
 		Jenis:       registMakananRequest.Jenis,
 		Bahan:       strings.Join(registMakananRequest.Bahan, ", "),
 		CookingStep: strings.Join(registMakananRequest.CookingStep, "., "),
-		CreatedAt:   models.TimeWrapper{time.Now()},
-		UpdatedAt:   models.TimeWrapper{time.Now()},
+		CreatedAt:   models.TimeWrapper{Time: time.Now()},
+		UpdatedAt:   models.TimeWrapper{Time: time.Now()},
 	}
 	err = service.makananRepo.CreateMakanan(makanan)
-	return utils.Response{}
+	if err != nil {
+		response.StatusCode = 500
+		response.Messages = "Failed to create makanan"
+		response.Data = nil
+		return response
+	}
+	response.StatusCode = 200
+	response.Messages = "Success"
+	response.Data = makanan
+	return response
 }
 
 type AdminService interface {
 	RegisterGym(bearerToken string, registGymRequest utils.GymRequest) utils.Response
 	RegisterFranchise(bearerToken string, registFranchiseRequest utils.FranchiseRequest) utils.Response
 	RegisterMakanan(bearerToken string, registMakananRequest utils.MakananRequest) utils.Response
-}
-
-func NewAdminService(db *gorm.DB) AdminService {
-	return &adminService{
-		gymRepo:       repositories.NewDBGymRepository(db),
-		gymKode:       repositories.NewDBKodeGymRepository(db),
-		gymUsedCode:   repositories.NewDBUsedCodeRepository(db),
-		makananRepo:   repositories.NewDBMakananRepository(db),
-		franchiseRepo: repositories.NewDBFranchiseRepository(db),
-	}
 }

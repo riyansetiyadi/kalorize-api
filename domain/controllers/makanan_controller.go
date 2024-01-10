@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"kalorize-api/domain/services"
 	"strings"
 
@@ -46,7 +45,6 @@ func (controller *MakananController) GetMakananById(c echo.Context) error {
 	if authorizationHeader == "" || !strings.HasPrefix(authorizationHeader, "Bearer ") {
 		return c.JSON(401, "Unauthorized")
 	}
-	fmt.Print("Param: ", c.Param("makananId"))
 	response := controller.makananService.GetMakananById(c.Param("makananId"))
 	return c.JSON(response.StatusCode, response)
 }

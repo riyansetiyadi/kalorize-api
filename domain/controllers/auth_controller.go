@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"kalorize-api/domain/services"
 	"kalorize-api/utils"
 	"strings"
@@ -79,7 +78,6 @@ func (controller *AuthController) GetUser(c echo.Context) error {
 	}
 
 	token := strings.TrimPrefix(authorizationHeader, "Bearer ")
-	fmt.Print("token", token)
 	response := controller.authService.GetLoggedInUser(token)
 	return c.JSON(response.StatusCode, response)
 }

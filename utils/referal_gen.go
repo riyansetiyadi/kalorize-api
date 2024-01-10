@@ -8,8 +8,7 @@ import (
 )
 
 func GenerateReferalCode(fullname string) string {
-	var username string
-	username = strings.Split(fullname, " ")[0]
+	username := strings.Split(fullname, " ")[0]
 	return username + RandomInt(5)
 }
 

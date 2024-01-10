@@ -47,7 +47,7 @@ func (service *authService) Login(email, password string) utils.Response {
 		response.Data = nil
 		return response
 	}
-	token, err := utils.GenerateJWTToken(user.Fullname, user.Email, user.Role, "kalorize")
+	token, err := utils.GenerateJWTAccessToken(user.Fullname, user.Email, user.Role, "kalorize")
 	if err != nil {
 		response.StatusCode = 500
 		response.Messages = "Token generation failed"
@@ -105,7 +105,7 @@ func (service *authService) Register(registerRequest utils.UserRequest, gymKode 
 		response.Data = nil
 		return response
 	}
-	token, err := utils.GenerateJWTToken(registerRequest.Fullname, registerRequest.Email, registerRequest.Role, "kalorize")
+	token, err := utils.GenerateJWTAccessToken(registerRequest.Fullname, registerRequest.Email, registerRequest.Role, "kalorize")
 	if err != nil {
 		response.StatusCode = 500
 		response.Messages = "Token generation failed"
@@ -124,11 +124,18 @@ func (service *authService) Register(registerRequest utils.UserRequest, gymKode 
 		ReferalCode: utils.GenerateReferalCode(registerRequest.Fullname),
 		Password:    string(hashedPassword),
 	}
+
 	usedCode := models.UsedCode{
 		KodeGym: gymKode,
 		IdUser:  user.IdUser,
 	}
 	err = service.usedCodeRepo.CreateNewUsedCode(usedCode)
+	if err != nil {
+		response.StatusCode = 500
+		response.Messages = "Used code creation failed"
+		response.Data = user.IdUser
+		return response
+	}
 	err = service.authRepo.CreateNewUser(user)
 	if err != nil {
 		response.StatusCode = 500

@@ -34,7 +34,7 @@ func (tw *TimeWrapper) Scan(value interface{}) error {
 
 	t, ok := value.(time.Time)
 	if !ok {
-		return fmt.Errorf("Failed to scan time")
+		return fmt.Errorf("failed to scan time")
 	}
 
 	tw.Time = t

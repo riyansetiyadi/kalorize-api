@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"kalorize-api/domain/services"
 	"kalorize-api/utils"
 
@@ -25,7 +24,6 @@ func NewQuestionnaireController(db *gorm.DB) QuestionnaireController {
 }
 
 func (controller *QuestionnaireController) FillQuestionnaire(c echo.Context) error {
-	fmt.Print("Masuk Controller")
 	type payload struct {
 		IdUser       string `json:"idUser" validate:"required"`
 		Umur         int    `json:"umur"`

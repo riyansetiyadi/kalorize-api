@@ -25,8 +25,10 @@ func (gymOwner *gymOwnerService) GenerateKodeGym(idGym uuid.UUID) utils.Response
 		return response
 	}
 	var kodeGym = models.KodeGym{
-		KodeGym: utils.GenerateKodeGym(Gym.NamaGym),
-		IdGym:   idGym,
+		IdKodeGym:   uuid.New(),
+		KodeGym:     utils.GenerateKodeGym(Gym.NamaGym),
+		IdGym:       idGym,
+		ExpiredTime: utils.GetExpiredTime(),
 	}
 
 	err = gymOwner.gymKode.CreateNewKodeGym(kodeGym)

@@ -39,10 +39,7 @@ func (db *dbUser) GetUserByEmail(email string) (models.User, error) {
 func (db *dbUser) FindReferalCodeIfExist(code string) bool {
 	var user models.User
 	err := db.Conn.Where("referal_code = ?", code).First(&user).Error
-	if err != nil {
-		return false
-	}
-	return true
+	return err == nil
 }
 
 func (db *dbUser) UpdateUser(user models.User) error {
