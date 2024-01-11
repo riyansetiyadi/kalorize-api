@@ -7,7 +7,7 @@ import (
 )
 
 type Makanan struct {
-	IdMakanan   int         `json:"id_makanan" gorm:"column:id_makanan;primary_key;type:char(6);"`
+	IdMakanan   string      `json:"id_makanan" gorm:"column:id_makanan;primary_key;type:char(36);"`
 	Nama        string      `json:"nama" gorm:"column:nama;type:varchar(255);"`
 	Jenis       string      `json:"jenis" gorm:"column:jenis;type:varchar(255);"`
 	Kalori      int         `json:"kalori" gorm:"column:kalori;type:int;"`
@@ -25,7 +25,7 @@ func (m *Makanan) TableName() string {
 type TimeWrapper struct {
 	time.Time
 }
-	
+
 func (tw *TimeWrapper) Scan(value interface{}) error {
 	if value == nil {
 		tw.Time = time.Time{}

@@ -14,4 +14,5 @@ type UserRequest struct {
 	TinggiBadan          int    `json:"tinggi_badan"`
 	FrekuensiGym         int    `json:"frekuensi_gym"`
 	TargetKalori         int    `json:"target_kalori"`
+	Foto                 string `json:"foto"`
 }

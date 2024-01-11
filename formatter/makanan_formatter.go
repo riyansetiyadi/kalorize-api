@@ -6,7 +6,7 @@ import (
 )
 
 type MakananFormat struct {
-	ID          int
+	ID          string
 	Nama        string
 	Jenis       string
 	Bahan       []string
