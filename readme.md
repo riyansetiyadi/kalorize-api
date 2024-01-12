@@ -25,7 +25,7 @@ Follow these steps to run the Echo framework application on port 8080:
 
 3. Start the application by running the following command:
     ```shell
-    server.go
+    server.exe
     ```
 
 4. Open your web browser and navigate to `http://localhost:8080` to access the application.
