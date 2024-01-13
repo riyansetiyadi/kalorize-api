@@ -1,4 +1,4 @@
-# Running Echo Framework Application in Golang on Port 8080
+# Running Echo Framework Application in Golang 
 
 This README provides instructions on how to run an Echo framework application in Golang on port 8080.
 
@@ -25,10 +25,8 @@ Follow these steps to run the Echo framework application on port 8080:
 
 3. Start the application by running the following command:
     ```shell
-    ./<application_name>
+    server.exe
     ```
-
-    Replace `<application_name>` with the name of your application binary.
 
 4. Open your web browser and navigate to `http://localhost:8080` to access the application.
 
