@@ -98,7 +98,6 @@ func (service *userService) EditPassword(token string, payload utils.UserRequest
 			Data:       nil,
 		}
 	}
-	fmt.Print(emailUser)
 	user, err := service.userRepository.GetUserByEmail(emailUser)
 	if err != nil && user.Email != emailUser {
 		return utils.Response{
@@ -125,7 +124,11 @@ func (service *userService) EditPassword(token string, payload utils.UserRequest
 		}
 	}
 
-	return utils.Response{}
+	return utils.Response{
+		StatusCode: 200,
+		Messages:   "Success",
+		Data:       user,
+	}
 }
 
 func (service *userService) EditPhoto(token string, payload utils.UploadedPhoto) utils.Response {
