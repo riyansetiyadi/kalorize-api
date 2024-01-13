@@ -7,6 +7,7 @@ import (
 	"kalorize-api/utils"
 	"os"
 	"path/filepath"
+	"reflect"
 
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -45,13 +46,13 @@ func (service *userService) EditUser(token string, payload utils.UserRequest) ut
 			Data:       nil,
 		}
 	}
-	user.Fullname = payload.Fullname
-	user.Email = payload.Email
-	user.BeratBadan = payload.BeratBadan
-	user.TinggiBadan = payload.TinggiBadan
-	user.Umur = payload.Umur
-	user.FrekuensiGym = payload.FrekuensiGym
-	user.TargetKalori = payload.TargetKalori
+	validateAndAssign(&user.Fullname, payload.Fullname)
+	validateAndAssign(&user.Email, payload.Email)
+	validateAndAssign(&user.BeratBadan, payload.BeratBadan)
+	validateAndAssign(&user.TinggiBadan, payload.TinggiBadan)
+	validateAndAssign(&user.Umur, payload.Umur)
+	validateAndAssign(&user.FrekuensiGym, payload.FrekuensiGym)
+	validateAndAssign(&user.TargetKalori, payload.TargetKalori)
 	err = service.userRepository.UpdateUser(user)
 	if err != nil {
 		return utils.Response{
@@ -68,6 +69,26 @@ func (service *userService) EditUser(token string, payload utils.UserRequest) ut
 	}
 }
 
+func validateAndAssign(target interface{}, source interface{}) {
+	if source != nil {
+		targetValue := reflect.ValueOf(target)
+		sourceValue := reflect.ValueOf(source)
+
+		if targetValue.Kind() == reflect.Ptr && !targetValue.IsNil() {
+			if sourceValue.Kind() == reflect.Ptr {
+				if sourceValue.Elem().IsValid() {
+					targetValue.Elem().Set(sourceValue.Elem())
+				}
+			} else {
+				// If source is not a pointer, and not an empty string, directly set the value
+				if sourceValue.Kind() != reflect.String || sourceValue.String() != "" {
+					targetValue.Elem().Set(sourceValue)
+				}
+			}
+		}
+	}
+}
+
 func (service *userService) EditPassword(token string, payload utils.UserRequest) utils.Response {
 	emailUser, err := utils.ParseData(token)
 	if err != nil || emailUser == "" {
@@ -77,8 +98,9 @@ func (service *userService) EditPassword(token string, payload utils.UserRequest
 			Data:       nil,
 		}
 	}
+	fmt.Print(emailUser)
 	user, err := service.userRepository.GetUserByEmail(emailUser)
-	if err != nil {
+	if err != nil && user.Email != emailUser {
 		return utils.Response{
 			StatusCode: 500,
 			Messages:   "Failed to get user",

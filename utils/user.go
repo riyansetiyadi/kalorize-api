@@ -16,3 +16,15 @@ type UserRequest struct {
 	TargetKalori         int    `json:"target_kalori"`
 	Foto                 string `json:"foto"`
 }
+
+func ValidateAndAssign(target *string, source string) {
+	if source != "" {
+		*target = source
+	}
+}
+
+func ValidateAndAssignInt(target *int, source *int) {
+	if source != nil {
+		*target = *source
+	}
+}

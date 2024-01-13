@@ -32,14 +32,15 @@ func (controller *UserController) EditUser(c echo.Context) error {
 	}
 	token := strings.TrimPrefix(authorizationHeader, "Bearer ")
 	type payload struct {
-		NamaUser     string `json:"namaUser" validate:"required"`
-		EmailUser    string `json:"emailUser" validate:"required,email"`
-		BeratBadan   int    `json:"beratBadan" validate:"required"`
-		TinggiBadan  int    `json:"tinggiBadan" validate:"required"`
-		Umur         int    `json:"umur" validate:"required"`
-		FrekuensiGym int    `json:"frekuensiGym" validate:"required"`
-		TargetKalori int    `json:"targetKalori" validate:"required"`
+		NamaUser     string `json:"namaUser"`
+		EmailUser    string `json:"emailUser"`
+		BeratBadan   int    `json:"beratBadan"`
+		TinggiBadan  int    `json:"tinggiBadan"`
+		Umur         int    `json:"umur"`
+		FrekuensiGym int    `json:"frekuensiGym"`
+		TargetKalori int    `json:"targetKalori"`
 	}
+
 	payloadValidator := new(payload)
 	if err := c.Bind(payloadValidator); err != nil {
 		return c.JSON(400, err.Error())
@@ -69,8 +70,8 @@ func (controller *UserController) EditPassword(c echo.Context) error {
 	}
 	token := strings.TrimPrefix(authorizationHeader, "Bearer ")
 	type payload struct {
-		PasswordUser             string `json:"passwordUser" validate:"required"`
-		PasswordConfirmationUser string `json:"passwordConfirmationUser" validate:"required"`
+		PasswordUser             string `json:"password" validate:"required"`
+		PasswordConfirmationUser string `json:"passwordConfirmation" validate:"required"`
 	}
 	payloadValidator := new(payload)
 	if err := c.Bind(payloadValidator); err != nil {
