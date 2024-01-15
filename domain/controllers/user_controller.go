@@ -32,13 +32,9 @@ func (controller *UserController) EditUser(c echo.Context) error {
 	}
 	token := strings.TrimPrefix(authorizationHeader, "Bearer ")
 	type payload struct {
-		NamaUser     string `json:"namaUser"`
-		EmailUser    string `json:"emailUser"`
-		BeratBadan   int    `json:"beratBadan"`
-		TinggiBadan  int    `json:"tinggiBadan"`
-		Umur         int    `json:"umur"`
-		FrekuensiGym int    `json:"frekuensiGym"`
-		TargetKalori int    `json:"targetKalori"`
+		NamaUser  string `json:"namaUser"`
+		EmailUser string `json:"emailUser"`
+		NoTelepon string `json:"noTelepon"`
 	}
 
 	payloadValidator := new(payload)
@@ -50,13 +46,9 @@ func (controller *UserController) EditUser(c echo.Context) error {
 		return c.JSON(400, err.Error())
 	}
 	var editUserPayload utils.UserRequest = utils.UserRequest{
-		Fullname:     payloadValidator.NamaUser,
-		Email:        payloadValidator.EmailUser,
-		BeratBadan:   payloadValidator.BeratBadan,
-		TinggiBadan:  payloadValidator.TinggiBadan,
-		Umur:         payloadValidator.Umur,
-		FrekuensiGym: payloadValidator.FrekuensiGym,
-		TargetKalori: payloadValidator.TargetKalori,
+		Fullname:  payloadValidator.NamaUser,
+		Email:     payloadValidator.EmailUser,
+		NoTelepon: payloadValidator.NoTelepon,
 	}
 
 	response := controller.userService.EditUser(token, editUserPayload)
@@ -70,7 +62,8 @@ func (controller *UserController) EditPassword(c echo.Context) error {
 	}
 	token := strings.TrimPrefix(authorizationHeader, "Bearer ")
 	type payload struct {
-		PasswordUser             string `json:"password" validate:"required"`
+		OldPassword              string `json:"oldPassword" validate:"required"`
+		NewPassword              string `json:"newPassword" validate:"required"`
 		PasswordConfirmationUser string `json:"passwordConfirmation" validate:"required"`
 	}
 	payloadValidator := new(payload)
@@ -82,11 +75,11 @@ func (controller *UserController) EditPassword(c echo.Context) error {
 		return c.JSON(400, err.Error())
 	}
 	var editPasswordPayload utils.UserRequest = utils.UserRequest{
-		Password:             payloadValidator.PasswordUser,
+		Password:             payloadValidator.NewPassword,
 		PasswordConfirmation: payloadValidator.PasswordConfirmationUser,
 	}
 
-	response := controller.userService.EditPassword(token, editPasswordPayload)
+	response := controller.userService.EditPassword(token, editPasswordPayload, payloadValidator.OldPassword)
 	return c.JSON(response.StatusCode, response)
 }
 

@@ -17,6 +17,7 @@ func main() {
 	routes.RouteQuestionnaire(route, db)
 	routes.RoutesAdmin(route, db)
 	routes.RouteUser(route, db)
+	routes.RoutePhotoStatic(route)
 
 	// Start server
 	port := 8080

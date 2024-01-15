@@ -19,6 +19,8 @@ type User struct {
 	TargetKalori int       `json:"target_kalori" gorm:"column:target_kalori;type:int;"`
 	ReferalCode  string    `json:"referal_code" gorm:"column:referal_code;type:varchar(255);"`
 	Foto         string    `json:"foto" gorm:"column:foto;type:varchar(255);"`
+	FotoUrl      string    `json:"foto_url" gorm:"column:foto_url;type:varchar(255);"`
+	NoTelepon    string    `json:"no_telepon" gorm:"column:no_telepon;type:varchar(255);"`
 }
 
 func (u *User) TableName() string {

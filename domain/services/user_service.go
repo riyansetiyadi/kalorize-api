@@ -15,7 +15,7 @@ import (
 
 type UserService interface {
 	EditUser(token string, payload utils.UserRequest) utils.Response
-	EditPassword(token string, payload utils.UserRequest) utils.Response
+	EditPassword(token string, payload utils.UserRequest, oldPassword string) utils.Response
 	EditPhoto(token string, payload utils.UploadedPhoto) utils.Response
 }
 
@@ -48,11 +48,8 @@ func (service *userService) EditUser(token string, payload utils.UserRequest) ut
 	}
 	validateAndAssign(&user.Fullname, payload.Fullname)
 	validateAndAssign(&user.Email, payload.Email)
-	validateAndAssign(&user.BeratBadan, payload.BeratBadan)
-	validateAndAssign(&user.TinggiBadan, payload.TinggiBadan)
-	validateAndAssign(&user.Umur, payload.Umur)
-	validateAndAssign(&user.FrekuensiGym, payload.FrekuensiGym)
-	validateAndAssign(&user.TargetKalori, payload.TargetKalori)
+	validateAndAssign(&user.NoTelepon, payload.NoTelepon)
+
 	err = service.userRepository.UpdateUser(user)
 	if err != nil {
 		return utils.Response{
@@ -89,7 +86,7 @@ func validateAndAssign(target interface{}, source interface{}) {
 	}
 }
 
-func (service *userService) EditPassword(token string, payload utils.UserRequest) utils.Response {
+func (service *userService) EditPassword(token string, payload utils.UserRequest, oldPassword string) utils.Response {
 	emailUser, err := utils.ParseData(token)
 	if err != nil || emailUser == "" {
 		return utils.Response{
@@ -103,6 +100,21 @@ func (service *userService) EditPassword(token string, payload utils.UserRequest
 		return utils.Response{
 			StatusCode: 500,
 			Messages:   "Failed to get user",
+			Data:       nil,
+		}
+	}
+	hashedOldPassword, err := bcrypt.GenerateFromPassword([]byte(oldPassword), bcrypt.DefaultCost)
+	if user.Password != string(hashedOldPassword) {
+		return utils.Response{
+			StatusCode: 500,
+			Messages:   "Old password is wrong",
+			Data:       nil,
+		}
+	}
+	if err != nil {
+		return utils.Response{
+			StatusCode: 500,
+			Messages:   "Failed to validate old password",
 			Data:       nil,
 		}
 	}
@@ -178,6 +190,7 @@ func (service *userService) EditPhoto(token string, payload utils.UploadedPhoto)
 		}
 	}
 	user.Foto = payload.Alias + filepath.Ext(payload.Handler.Filename)
+	user.FotoUrl = "https://985e-36-71-83-68.ngrok-free.app/api/v1/storage/" + user.Foto
 	err = service.userRepository.UpdateUser(user)
 	if err != nil {
 		return utils.Response{
@@ -189,6 +202,6 @@ func (service *userService) EditPhoto(token string, payload utils.UploadedPhoto)
 	return utils.Response{
 		StatusCode: 200,
 		Messages:   "Success",
-		Data:       user.Foto,
+		Data:       user,
 	}
 }

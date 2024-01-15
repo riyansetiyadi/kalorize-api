@@ -15,6 +15,7 @@ import (
 type authService struct {
 	authRepo     repositories.UserRepository
 	usedCodeRepo repositories.UsedCodeRepository
+	tokenRepo    repositories.TokenRepository
 }
 
 func (service *authService) Login(email, password string) utils.Response {
@@ -47,19 +48,41 @@ func (service *authService) Login(email, password string) utils.Response {
 		response.Data = nil
 		return response
 	}
-	token, err := utils.GenerateJWTAccessToken(user.Fullname, user.Email, user.Role, "kalorize")
+	AccessToken, err := utils.GenerateJWTAccessToken(user.Fullname, user.Email, user.Role, "kalorize")
 	if err != nil {
 		response.StatusCode = 500
 		response.Messages = "Token generation failed"
 		response.Data = nil
 		return response
 	}
+	refreshToken, err := utils.GenerateJWTRefreshToken(user.Fullname, user.Email, user.Role, "kalorize")
+	if err != nil {
+		response.StatusCode = 500
+		response.Messages = "Token generation failed"
+		response.Data = nil
+		return response
+	}
+	token := models.Token{
+		IdToken:      uuid.New(),
+		AccessToken:  AccessToken,
+		RefreshToken: refreshToken,
+		UserId:       user.IdUser,
+	}
+	err = service.tokenRepo.CreateNewToken(token)
+	if err != nil {
+		response.StatusCode = 500
+		response.Messages = "Token creation failed"
+		response.Data = nil
+		return response
+	}
+
 	response.StatusCode = 200
 	response.Messages = "success"
 
 	response.Data = map[string]interface{}{
-		"token": token,
-		"role":  user.Role,
+		"accessToken":  AccessToken,
+		"refreshToken": refreshToken,
+		"role":         user.Role,
 	}
 	return response
 }
@@ -176,6 +199,8 @@ func (service *authService) GetLoggedInUser(bearerToken string) utils.Response {
 			"umur":         user.Umur,
 			"beratBadan":   user.BeratBadan,
 			"role":         user.Role,
+			"foto":         user.FotoUrl,
+			"noTelepon":    user.NoTelepon,
 		}
 		return response
 	} else {
@@ -195,5 +220,7 @@ type AuthService interface {
 func NewAuthService(db *gorm.DB) AuthService {
 	return &authService{
 		authRepo:     repositories.NewDBUserRepository(db),
-		usedCodeRepo: repositories.NewDBUsedCodeRepository(db)}
+		usedCodeRepo: repositories.NewDBUsedCodeRepository(db),
+		tokenRepo:    repositories.NewDBTokenRepository(db),
+	}
 }

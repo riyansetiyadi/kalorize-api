@@ -13,6 +13,7 @@ type MakananFormat struct {
 	CookingStep []string
 	Kalori      int
 	Protein     int
+	Foto        string
 }
 
 func FormatterMakanan(makanan models.Makanan) MakananFormat {
@@ -24,5 +25,6 @@ func FormatterMakanan(makanan models.Makanan) MakananFormat {
 	makananFormatted.CookingStep = utils.ConvertToArrayWithDotSeparator(makanan.CookingStep)
 	makananFormatted.Kalori = makanan.Kalori
 	makananFormatted.Protein = makanan.Protein
+	makananFormatted.Foto = makanan.Foto
 	return makananFormatted
 }

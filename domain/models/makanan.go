@@ -10,6 +10,7 @@ type Makanan struct {
 	IdMakanan   string      `json:"id_makanan" gorm:"column:id_makanan;primary_key;type:char(36);"`
 	Nama        string      `json:"nama" gorm:"column:nama;type:varchar(255);"`
 	Jenis       string      `json:"jenis" gorm:"column:jenis;type:varchar(255);"`
+	Foto        string      `json:"foto" gorm:"column:foto;type:varchar(255);"`
 	Kalori      int         `json:"kalori" gorm:"column:kalori;type:int;"`
 	Protein     int         `json:"protein" gorm:"column:protein;type:int;"`
 	Bahan       string      `json:"bahan" gorm:"column:bahan;type:text;"`
