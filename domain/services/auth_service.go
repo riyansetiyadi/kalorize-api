@@ -189,6 +189,7 @@ func (service *authService) GetLoggedInUser(bearerToken string) utils.Response {
 		firstname := names[0]
 		lastname := names[1]
 		response.Data = map[string]interface{}{
+			"idUser":       user.IdUser,
 			"firstName":    firstname,
 			"lastName":     lastname,
 			"email":        user.Email,

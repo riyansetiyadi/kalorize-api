@@ -6,13 +6,14 @@ import (
 )
 
 func FormatterMakananToMultiDimentionalArray(makanan []models.Makanan) [][]string {
-	var header = []string{"Nama", "Jenis", "Foto", "Bahan", "Cooking Step", "Kalori", "Protein"}
+	var header = []string{"id", "Nama", "Jenis", "Foto", "Bahan", "Cooking Step", "Kalori", "Protein"}
 
 	var result [][]string
 	result = append(result, header)
 
 	for i := range makanan {
 		var row []string
+		row = append(row, makanan[i].IdMakanan)
 		row = append(row, makanan[i].Nama)
 		row = append(row, makanan[i].Jenis)
 		row = append(row, makanan[i].Foto)

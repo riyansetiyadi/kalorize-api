@@ -3,29 +3,109 @@ package services
 import (
 	"fmt"
 	"io"
+	"kalorize-api/domain/models"
 	"kalorize-api/domain/repositories"
 	"kalorize-api/utils"
 	"os"
 	"path/filepath"
 	"reflect"
+	"time"
 
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
 type UserService interface {
+	GetHistory(token string, date time.Time) utils.Response
+	CreateHistory(token string, historyPayload utils.HistoryRequest) utils.Response
 	EditUser(token string, payload utils.UserRequest) utils.Response
 	EditPassword(token string, payload utils.UserRequest, oldPassword string) utils.Response
 	EditPhoto(token string, payload utils.UploadedPhoto) utils.Response
 }
 
 type userService struct {
-	userRepository repositories.UserRepository
+	userRepository    repositories.UserRepository
+	historyRepository repositories.HistoryRepository
 }
 
 func NewUserService(db *gorm.DB) UserService {
 	return &userService{
-		userRepository: repositories.NewDBUserRepository(db),
+		userRepository:    repositories.NewDBUserRepository(db),
+		historyRepository: repositories.NewDBHistoryRepository(db),
+	}
+}
+
+func (service *userService) CreateHistory(token string, historyPayload utils.HistoryRequest) utils.Response {
+	emailUser, err := utils.ParseData(token)
+	if err != nil || emailUser == "" {
+		return utils.Response{
+			StatusCode: 401,
+			Messages:   "Unauthorized",
+			Data:       nil,
+		}
+	}
+	user, err := service.userRepository.GetUserByEmail(emailUser)
+	if err != nil {
+		return utils.Response{
+			StatusCode: 500,
+			Messages:   "Failed to get user",
+			Data:       nil,
+		}
+	}
+	history := models.History{
+		IdHistory:     uuid.New(),
+		IdUser:        user.IdUser,
+		IdBreakfast:   historyPayload.IdBreakfast,
+		IdLunch:       historyPayload.IdLunch,
+		IdDinner:      historyPayload.IdDinner,
+		TanggalDibuat: time.Now(),
+	}
+
+	if err != nil {
+		return utils.Response{
+			StatusCode: 500,
+			Messages:   "Failed to create history",
+			Data:       nil,
+		}
+	}
+	err = service.historyRepository.CreateHistory(history)
+	return utils.Response{
+		StatusCode: 200,
+		Messages:   "Success",
+		Data:       history,
+	}
+}
+
+func (service *userService) GetHistory(token string, date time.Time) utils.Response {
+	emailUser, err := utils.ParseData(token)
+	if err != nil || emailUser == "" {
+		return utils.Response{
+			StatusCode: 401,
+			Messages:   "Unauthorized",
+			Data:       nil,
+		}
+	}
+	user, err := service.userRepository.GetUserByEmail(emailUser)
+	if err != nil {
+		return utils.Response{
+			StatusCode: 500,
+			Messages:   "Failed to get user",
+			Data:       nil,
+		}
+	}
+	history, err := service.historyRepository.GetHistoryByIdUserAndDate(user.IdUser, date)
+	if err != nil {
+		return utils.Response{
+			StatusCode: 500,
+			Messages:   "Failed to get history",
+			Data:       nil,
+		}
+	}
+	return utils.Response{
+		StatusCode: 200,
+		Messages:   "Success",
+		Data:       history,
 	}
 }
 
