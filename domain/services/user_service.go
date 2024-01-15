@@ -178,6 +178,14 @@ func (service *userService) EditPhoto(token string, payload utils.UploadedPhoto)
 		}
 	}
 	user.Foto = payload.Alias + filepath.Ext(payload.Handler.Filename)
+	err = service.userRepository.UpdateUser(user)
+	if err != nil {
+		return utils.Response{
+			StatusCode: 500,
+			Messages:   "Failed to edit user",
+			Data:       nil,
+		}
+	}
 	return utils.Response{
 		StatusCode: 200,
 		Messages:   "Success",

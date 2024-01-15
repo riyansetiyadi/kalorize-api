@@ -48,6 +48,7 @@ func (controller *AuthController) Register(c echo.Context) error {
 		PasswordConfirmation string `json:"passwordConfirmation" validate:"required,eqfield=Password"`
 		GymKode              string `json:"gymKode" validate:"required"`
 		ReferalCode          string `json:"referalCode"`
+		Role                 string `json:"role"`
 	}
 
 	payloadValidator := new(payload)
@@ -65,6 +66,7 @@ func (controller *AuthController) Register(c echo.Context) error {
 		Password:             payloadValidator.Password,
 		PasswordConfirmation: payloadValidator.PasswordConfirmation,
 		ReferalCode:          payloadValidator.ReferalCode,
+		Role:                 payloadValidator.Role,
 	}
 
 	response := controller.authService.Register(regisUserPayload, payloadValidator.GymKode)

@@ -115,16 +115,16 @@ func (service *authService) Register(registerRequest utils.UserRequest, gymKode 
 	response.Data = map[string]interface{}{
 		"token": token,
 	}
-	uuid := uuid.New()
+	userId := uuid.New()
 	user = models.User{
-		IdUser:      uuid,
+		IdUser:      userId,
 		Fullname:    registerRequest.Fullname,
 		Email:       registerRequest.Email,
 		Umur:        registerRequest.Umur,
 		ReferalCode: utils.GenerateReferalCode(registerRequest.Fullname),
 		Password:    string(hashedPassword),
+		Role:        registerRequest.Role,
 	}
-
 	usedCode := models.UsedCode{
 		KodeGym: gymKode,
 		IdUser:  user.IdUser,
@@ -165,7 +165,6 @@ func (service *authService) GetLoggedInUser(bearerToken string) utils.Response {
 		names := strings.Split(user.Fullname, " ")
 		firstname := names[0]
 		lastname := names[1]
-
 		response.Data = map[string]interface{}{
 			"firstName":    firstname,
 			"lastName":     lastname,
@@ -194,5 +193,7 @@ type AuthService interface {
 }
 
 func NewAuthService(db *gorm.DB) AuthService {
-	return &authService{authRepo: repositories.NewDBUserRepository(db)}
+	return &authService{
+		authRepo:     repositories.NewDBUserRepository(db),
+		usedCodeRepo: repositories.NewDBUsedCodeRepository(db)}
 }
