@@ -44,6 +44,6 @@ func (service *questionnaireService) FillQuestionnaire(questionnaireRequest util
 	}
 	response.StatusCode = 200
 	response.Messages = "Success"
-	response.Data = nil
+	response.Data = user
 	return response
 }

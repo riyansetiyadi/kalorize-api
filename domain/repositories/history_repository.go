@@ -1,11 +1,10 @@
 package repositories
 
 import (
-	"kalorize-api/domain/models"
-	"time"
-
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"kalorize-api/domain/models"
+	"time"
 )
 
 type dbHistory struct {
@@ -36,15 +35,15 @@ func (db *dbHistory) DeleteHistory(id string) error {
 	return db.Conn.Delete(&models.History{}, id).Error
 }
 
-func (db *dbHistory) GetHistoryByIdUser(id uuid.UUID) ([]models.History, error) {
-	var history []models.History
+func (db *dbHistory) GetHistoryByIdUser(id uuid.UUID) (models.History, error) {
+	var history models.History
 	err := db.Conn.Where("id_user = ?", id).Find(&history).Error
 	return history, err
 }
 
-func (db *dbHistory) GetHistoryByIdUserAndDate(id uuid.UUID, date time.Time) ([]models.History, error) {
-	var history []models.History
-	err := db.Conn.Where("id_user = ? AND date = ?", id, date).Find(&history).Error
+func (db *dbHistory) GetHistoryByIdUserAndDate(id uuid.UUID, date time.Time) (models.History, error) {
+	var history models.History
+	err := db.Conn.Where("id_user = ? AND tanggal_dibuat = ?", id, date).Find(&history).Error
 	return history, err
 }
 
@@ -54,8 +53,8 @@ type HistoryRepository interface {
 	CreateHistory(history models.History) error
 	UpdateHistory(history models.History) error
 	DeleteHistory(id string) error
-	GetHistoryByIdUser(id uuid.UUID) ([]models.History, error)
-	GetHistoryByIdUserAndDate(id uuid.UUID, date time.Time) ([]models.History, error)
+	GetHistoryByIdUser(id uuid.UUID) (models.History, error)
+	GetHistoryByIdUserAndDate(id uuid.UUID, date time.Time) (models.History, error)
 }
 
 func NewDBHistoryRepository(conn *gorm.DB) *dbHistory {

@@ -59,9 +59,19 @@ func (service *userService) CreateHistory(token string, historyPayload utils.His
 		IdBreakfast:   historyPayload.IdBreakfast,
 		IdLunch:       historyPayload.IdLunch,
 		IdDinner:      historyPayload.IdDinner,
+		TotalProtein:  historyPayload.TotalProtein,
+		TotalKalori:   historyPayload.TotalKalori,
 		TanggalDibuat: time.Now(),
 	}
 
+	if err != nil {
+		return utils.Response{
+			StatusCode: 500,
+			Messages:   "Failed to make history model",
+			Data:       nil,
+		}
+	}
+	err = service.historyRepository.CreateHistory(history)
 	if err != nil {
 		return utils.Response{
 			StatusCode: 500,
@@ -69,7 +79,6 @@ func (service *userService) CreateHistory(token string, historyPayload utils.His
 			Data:       nil,
 		}
 	}
-	err = service.historyRepository.CreateHistory(history)
 	return utils.Response{
 		StatusCode: 200,
 		Messages:   "Success",
@@ -94,7 +103,9 @@ func (service *userService) GetHistory(token string, date time.Time) utils.Respo
 			Data:       nil,
 		}
 	}
+
 	history, err := service.historyRepository.GetHistoryByIdUserAndDate(user.IdUser, date)
+	fmt.Print(history)
 	if err != nil {
 		return utils.Response{
 			StatusCode: 500,
@@ -183,8 +194,8 @@ func (service *userService) EditPassword(token string, payload utils.UserRequest
 			Data:       nil,
 		}
 	}
-	hashedOldPassword, err := bcrypt.GenerateFromPassword([]byte(oldPassword), bcrypt.DefaultCost)
-	if user.Password != string(hashedOldPassword) {
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(oldPassword))
+	if err != nil {
 		return utils.Response{
 			StatusCode: 500,
 			Messages:   "Old password is wrong",

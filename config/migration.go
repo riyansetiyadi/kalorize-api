@@ -13,4 +13,6 @@ func AutoMigration(db *gorm.DB) {
 	// db.AutoMigrate(&models.KodeGym{})
 	// db.AutoMigrate(&models.MealSet{})
 	// db.AutoMigrate(&models.Franchise{})
+	//db.AutoMigrate(&models.History{})
+	// db.AutoMigrate(&models.FranchiseMakanan{})
 }

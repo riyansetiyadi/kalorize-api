@@ -14,5 +14,5 @@ func RouteUser(apiv1 *echo.Group, db *gorm.DB) {
 	apiv1.PUT("/edit-password", userController.EditPassword)
 	apiv1.PUT("/edit-photo", userController.EditPhoto)
 	apiv1.POST("/user/history", userController.CreateHistory)
-	apiv1.GET("/user/history/:TanggalDibuat", userController.GetHistoryBaseDateTime)
+	apiv1.GET("/user/history", userController.GetHistoryBaseDateTime)
 }

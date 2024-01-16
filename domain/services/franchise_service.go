@@ -5,6 +5,7 @@ import (
 	"kalorize-api/domain/repositories"
 	"kalorize-api/utils"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -72,7 +73,7 @@ func (service *FranchiseService) UpdateFranchise(franchise models.Franchise) uti
 	return response
 }
 
-func (service *FranchiseService) ConnectFranchiseToMakanan(idMakanan string, idFranchise string) utils.Response {
+func (service *FranchiseService) ConnectFranchiseToMakanan(idMakanan string, idFranchise uuid.UUID) utils.Response {
 	var response utils.Response
 	var franchiseMakanan models.FranchiseMakanan
 	franchiseMakanan.IdFranchise = idFranchise

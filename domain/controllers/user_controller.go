@@ -117,9 +117,9 @@ func (controller *UserController) CreateHistory(c echo.Context) error {
 	}
 	token := strings.TrimPrefix(authorizationHeader, "Bearer ")
 	type payload struct {
-		BreakfastId   []string  `json:"breakfastId"`
-		LunchId       []string  `json:"lunchId"`
-		DinnerId      []string  `json:"dinnerId"`
+		BreakfastId   string    `json:"breakfastId"`
+		LunchId       string    `json:"lunchId"`
+		DinnerId      string    `json:"dinnerId"`
 		TotalCalories int       `json:"totalCalories"`
 		TotalProtein  int       `json:"totalProtein"`
 		TanggalDibuat time.Time `json:"tanggalDibuat"`
@@ -134,9 +134,9 @@ func (controller *UserController) CreateHistory(c echo.Context) error {
 		return c.JSON(400, err.Error())
 	}
 	var historyPayload utils.HistoryRequest = utils.HistoryRequest{
-		IdBreakfast:   strings.Join(payloadValidator.BreakfastId, ","),
-		IdLunch:       strings.Join(payloadValidator.LunchId, ","),
-		IdDinner:      strings.Join(payloadValidator.DinnerId, ","),
+		IdBreakfast:   payloadValidator.BreakfastId,
+		IdLunch:       payloadValidator.LunchId,
+		IdDinner:      payloadValidator.DinnerId,
 		TotalKalori:   payloadValidator.TotalCalories,
 		TotalProtein:  payloadValidator.TotalProtein,
 		TanggalDibuat: payloadValidator.TanggalDibuat,
@@ -151,12 +151,14 @@ func (controller *UserController) GetHistoryBaseDateTime(c echo.Context) error {
 	if authorizationHeader == "" || !strings.HasPrefix(authorizationHeader, "Bearer ") {
 		return c.JSON(401, "Unauthorized")
 	}
-	dateString := c.Param("TanggalDibuat")
-	date, err := utils.StringToDate(dateString)
+	timestampParam := c.QueryParam("timestamp")
+
+	// Parsing timestampParam menjadi time.Time
+	timestamp, err := time.Parse("2006-01-02T15:04:05", timestampParam)
 	if err != nil {
 		return c.JSON(400, err.Error())
 	}
 	token := strings.TrimPrefix(authorizationHeader, "Bearer ")
-	response := controller.userService.GetHistory(token, date)
+	response := controller.userService.GetHistory(token, timestamp)
 	return c.JSON(response.StatusCode, response)
 }

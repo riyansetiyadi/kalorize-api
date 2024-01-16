@@ -16,6 +16,7 @@ type authService struct {
 	authRepo     repositories.UserRepository
 	usedCodeRepo repositories.UsedCodeRepository
 	tokenRepo    repositories.TokenRepository
+	gymRepo      repositories.GymRepository
 }
 
 func (service *authService) Login(email, password string) utils.Response {
@@ -78,7 +79,6 @@ func (service *authService) Login(email, password string) utils.Response {
 
 	response.StatusCode = 200
 	response.Messages = "success"
-
 	response.Data = map[string]interface{}{
 		"accessToken":  AccessToken,
 		"refreshToken": refreshToken,
@@ -168,6 +168,7 @@ func (service *authService) Register(registerRequest utils.UserRequest, gymKode 
 	}
 	response.StatusCode = 200
 	response.Messages = "success"
+	response.Data = user
 	return response
 }
 
@@ -188,6 +189,20 @@ func (service *authService) GetLoggedInUser(bearerToken string) utils.Response {
 		names := strings.Split(user.Fullname, " ")
 		firstname := names[0]
 		lastname := names[1]
+		KodeGym, err := service.usedCodeRepo.GetusedCodeByIdUser(user.IdUser)
+		if err != nil {
+			response.StatusCode = 500
+			response.Messages = "Kode gym tidak ditemukan"
+			response.Data = nil
+			return response
+		}
+		Gym, err := service.gymRepo.GetGymById(KodeGym.IdGym)
+		if err != nil {
+			response.StatusCode = 500
+			response.Messages = "Gym tidak ditemukan"
+			response.Data = nil
+			return response
+		}
 		response.Data = map[string]interface{}{
 			"idUser":       user.IdUser,
 			"firstName":    firstname,
@@ -202,6 +217,8 @@ func (service *authService) GetLoggedInUser(bearerToken string) utils.Response {
 			"role":         user.Role,
 			"foto":         user.FotoUrl,
 			"noTelepon":    user.NoTelepon,
+			"KodeGym":      KodeGym.KodeGym,
+			"Gym":          Gym.NamaGym,
 		}
 		return response
 	} else {
@@ -223,5 +240,6 @@ func NewAuthService(db *gorm.DB) AuthService {
 		authRepo:     repositories.NewDBUserRepository(db),
 		usedCodeRepo: repositories.NewDBUsedCodeRepository(db),
 		tokenRepo:    repositories.NewDBTokenRepository(db),
+		gymRepo:      repositories.NewDBGymRepository(db),
 	}
 }
