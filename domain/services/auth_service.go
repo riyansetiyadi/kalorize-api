@@ -23,7 +23,7 @@ func (service *authService) Login(email, password string) utils.Response {
 	var response utils.Response
 	if email == "" || password == "" {
 		response.StatusCode = 400
-		response.Messages = "Username dan password tidak boleh kosong"
+		response.Messages = "email dan password tidak boleh kosong"
 		response.Data = nil
 		return response
 	}

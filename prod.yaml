@@ -1,6 +1,6 @@
 database:
-  host: "localhost"
-  port: "3307"
+  host: "my-sql-fly.internal"
+  port: "3306"
   dbname: kalorize
-  username: root
-  password: ""
+  username: satria
+  password: "password"
