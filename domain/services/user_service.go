@@ -1,18 +1,20 @@
 package services
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"kalorize-api/domain/models"
 	"kalorize-api/domain/repositories"
 	"kalorize-api/utils"
-	"os"
 	"path/filepath"
 	"reflect"
 	"time"
 
+	firebase "firebase.google.com/go"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
+	"google.golang.org/api/option"
 	"gorm.io/gorm"
 )
 
@@ -255,33 +257,70 @@ func (service *userService) EditPhoto(token string, payload utils.UploadedPhoto)
 	if payload.Alias != "" {
 		filename = fmt.Sprintf("%s%s", payload.Alias, filepath.Ext(payload.Handler.Filename))
 	}
-	dir, err := os.Getwd()
+
+	// Initialize Firebase app
+	opt := option.WithCredentialsFile("config/credentials.json")
+	app, err := firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {
 		return utils.Response{
 			StatusCode: 500,
-			Messages:   "Failed to get current directory",
+			Messages:   "Failed to initialize Firebase app",
 			Data:       nil,
 		}
 	}
-	fileLocation := filepath.Join(dir, "storage", filename)
-	targetFile, err := os.OpenFile(fileLocation, os.O_WRONLY|os.O_CREATE, 0666)
+
+	// Initialize Firebase Storage client
+	// Initialize Firebase Storage client
+	client, err := app.Storage(context.Background())
 	if err != nil {
 		return utils.Response{
 			StatusCode: 500,
-			Messages:   "Failed to open file",
+			Messages:   "Failed to initialize Firebase Storage client",
 			Data:       nil,
 		}
 	}
-	defer targetFile.Close()
-	if _, err := io.Copy(targetFile, payload.File); err != nil {
+
+	// Specify the path within the bucket where the file should be stored
+	storagePath := fmt.Sprintf("images/%s", filename)
+
+	// Open a new reader for the file
+	reader := payload.File
+
+	// Get the bucket handle from the client
+	bucket, err := client.Bucket("kalorize-71324.appspot.com")
+	if err != nil {
 		return utils.Response{
 			StatusCode: 500,
-			Messages:   "Failed to copy file",
+			Messages:   "Failed to get bucket handle from the client",
 			Data:       nil,
 		}
 	}
+	// Initialize the writer for the file
+	wc := bucket.Object(storagePath).NewWriter(context.Background())
+
+	// Upload the file to Firebase Storage
+	if _, err := io.Copy(wc, reader); err != nil {
+		return utils.Response{
+			StatusCode: 500,
+			Messages:   "Failed to upload file to Firebase Storage",
+			Data:       nil,
+		}
+	}
+
+	// Close the writer after copying
+	if err := wc.Close(); err != nil {
+		return utils.Response{
+			StatusCode: 500,
+			Messages:   "Failed to close Firebase Storage writer",
+			Data:       nil,
+		}
+	}
+
+	// Set user properties
 	user.Foto = payload.Alias + filepath.Ext(payload.Handler.Filename)
-	user.FotoUrl = "https://985e-36-71-83-68.ngrok-free.app/api/v1/storage/" + user.Foto
+	user.FotoUrl = fmt.Sprintf("https://storage.googleapis.com/kalorize-71324.appspot.com/%s", storagePath)
+
+	// Update user in the database
 	err = service.userRepository.UpdateUser(user)
 	if err != nil {
 		return utils.Response{
