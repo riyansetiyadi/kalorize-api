@@ -11,6 +11,7 @@ import (
 	"reflect"
 	"time"
 
+	"cloud.google.com/go/storage"
 	firebase "firebase.google.com/go"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -297,6 +298,7 @@ func (service *userService) EditPhoto(token string, payload utils.UploadedPhoto)
 	}
 	// Initialize the writer for the file
 	wc := bucket.Object(storagePath).NewWriter(context.Background())
+	wc.ACL = []storage.ACLRule{{Entity: storage.AllUsers, Role: storage.RoleReader}}
 
 	// Upload the file to Firebase Storage
 	if _, err := io.Copy(wc, reader); err != nil {

@@ -10,6 +10,7 @@ require (
 	github.com/spf13/viper v1.18.2
 	gorm.io/driver/mysql v1.5.2
 	google.golang.org/api v0.156.0 
+	cloud.google.com/go/storage v1.36.0
 )
 
 require (
@@ -19,7 +20,7 @@ require (
 	cloud.google.com/go/firestore v1.14.0 // indirect
 	cloud.google.com/go/iam v1.1.5 // indirect
 	cloud.google.com/go/longrunning v0.5.4 // indirect
-	cloud.google.com/go/storage v1.36.0 // indirect
+	 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/go-logr/logr v1.4.1 // indirect

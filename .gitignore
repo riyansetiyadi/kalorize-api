@@ -3,3 +3,9 @@ vendor/
 
 # Ignore config.yaml file
 config.yaml
+
+#igonre prod.yaml file
+prod.yaml
+
+#ignore credentials.json file
+credentials.json
