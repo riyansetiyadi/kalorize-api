@@ -18,7 +18,7 @@ func (db *dbMakanan) GetAllMakanan() ([]models.Makanan, error) {
 
 func (db *dbMakanan) GetMakananById(id string) (models.Makanan, error) {
 	var makanan models.Makanan
-	err := db.Conn.Where("id_makanan = ?", id).First(&makanan).Error
+	err := db.Conn.Where("id = ?", id).First(&makanan).Error
 	return makanan, err
 }
 

@@ -128,15 +128,20 @@ func (service *authService) Register(registerRequest utils.UserRequest, gymKode 
 		response.Data = nil
 		return response
 	}
-	token, err := utils.GenerateJWTAccessToken(registerRequest.Fullname, registerRequest.Email, registerRequest.Role, "kalorize")
+	accessToken, err := utils.GenerateJWTAccessToken(registerRequest.Fullname, registerRequest.Email, registerRequest.Role, "kalorize")
 	if err != nil {
 		response.StatusCode = 500
 		response.Messages = "Token generation failed"
 		response.Data = nil
 		return response
 	}
-	response.Data = map[string]interface{}{
-		"token": token,
+
+	refreshtoken, err := utils.GenerateJWTRefreshToken(registerRequest.Fullname, registerRequest.Email, registerRequest.Role, "kalorize")
+	if err != nil {
+		response.StatusCode = 500
+		response.Messages = "Token generation failed"
+		response.Data = nil
+		return response
 	}
 	userId := uuid.New()
 	user = models.User{
@@ -148,7 +153,24 @@ func (service *authService) Register(registerRequest utils.UserRequest, gymKode 
 		Password:    string(hashedPassword),
 		Role:        registerRequest.Role,
 	}
+	uuidString := "10bedc93-46f9-4111-87ec-c9ad948aff81"
+	parsedUUID, err := uuid.Parse(uuidString)
+	if err != nil {
+		response.StatusCode = 500
+		response.Messages = "Gym tidak ditemukan"
+		response.Data = nil
+		return response
+	}
+
+	gym, err := service.gymRepo.GetGymById(parsedUUID)
+	if err != nil {
+		response.StatusCode = 500
+		response.Messages = "Gym tidak ditemukan"
+		response.Data = nil
+		return response
+	}
 	usedCode := models.UsedCode{
+		IdGym:   gym.IdGym,
 		KodeGym: gymKode,
 		IdUser:  user.IdUser,
 	}
@@ -168,7 +190,11 @@ func (service *authService) Register(registerRequest utils.UserRequest, gymKode 
 	}
 	response.StatusCode = 200
 	response.Messages = "success"
-	response.Data = user
+	response.Data = map[string]interface{}{
+		"accessToken":  accessToken,
+		"refreshToken": refreshtoken,
+		"role":         user.Role,
+	}
 	return response
 }
 

@@ -26,7 +26,11 @@ func (service *makananService) GetAllMakanan() utils.Response {
 	}
 	var formattedMakanan []formatter.MakananFormat
 	for i := range makanan {
-		formattedMakanan = append(formattedMakanan, formatter.FormatterMakanan(makanan[i]))
+		if makanan[i].IdMakanan > "0" && makanan[i].IdMakanan < "201" {
+			formattedMakanan = append(formattedMakanan, formatter.FormatterMakananIndo(makanan[i]))
+		} else {
+			formattedMakanan = append(formattedMakanan, formatter.FormatterMakananLuarIndo(makanan[i]))
+		}
 	}
 	response.StatusCode = 200
 	response.Messages = "success"
@@ -62,8 +66,13 @@ func (service *makananService) GetMakananById(id string) utils.Response {
 		response.Data = nil
 		return response
 	}
+	var formattedMakanan formatter.MakananFormat
+	if id > "0" && id < "201" {
+		formattedMakanan = formatter.FormatterMakananIndo(makanan)
+	} else {
+		formattedMakanan = formatter.FormatterMakananLuarIndo(makanan)
 
-	formattedMakanan := formatter.FormatterMakanan(makanan)
+	}
 
 	response.StatusCode = 200
 	response.Messages = "success"

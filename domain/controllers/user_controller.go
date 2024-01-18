@@ -115,14 +115,14 @@ func (controller *UserController) CreateHistory(c echo.Context) error {
 	if authorizationHeader == "" || !strings.HasPrefix(authorizationHeader, "Bearer ") {
 		return c.JSON(401, "Unauthorized")
 	}
+
 	token := strings.TrimPrefix(authorizationHeader, "Bearer ")
 	type payload struct {
-		BreakfastId   string    `json:"breakfastId"`
-		LunchId       string    `json:"lunchId"`
-		DinnerId      string    `json:"dinnerId"`
-		TotalCalories int       `json:"totalCalories"`
-		TotalProtein  int       `json:"totalProtein"`
-		TanggalDibuat time.Time `json:"tanggalDibuat"`
+		BreakfastId   string `json:"breakfastId"`
+		LunchId       string `json:"lunchId"`
+		DinnerId      string `json:"dinnerId"`
+		TotalCalories int    `json:"totalCalories"`
+		TotalProtein  int    `json:"totalProtein"`
 	}
 
 	payloadValidator := new(payload)
@@ -133,13 +133,13 @@ func (controller *UserController) CreateHistory(c echo.Context) error {
 	if err := controller.validate.Struct(payloadValidator); err != nil {
 		return c.JSON(400, err.Error())
 	}
+
 	var historyPayload utils.HistoryRequest = utils.HistoryRequest{
-		IdBreakfast:   payloadValidator.BreakfastId,
-		IdLunch:       payloadValidator.LunchId,
-		IdDinner:      payloadValidator.DinnerId,
-		TotalKalori:   payloadValidator.TotalCalories,
-		TotalProtein:  payloadValidator.TotalProtein,
-		TanggalDibuat: payloadValidator.TanggalDibuat,
+		IdBreakfast:  payloadValidator.BreakfastId,
+		IdLunch:      payloadValidator.LunchId,
+		IdDinner:     payloadValidator.DinnerId,
+		TotalKalori:  payloadValidator.TotalCalories,
+		TotalProtein: payloadValidator.TotalProtein,
 	}
 
 	response := controller.userService.CreateHistory(token, historyPayload)

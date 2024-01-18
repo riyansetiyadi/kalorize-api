@@ -3,15 +3,17 @@ module kalorize-api
 go 1.19
 
 require (
+	cloud.google.com/go/storage v1.36.0
 	firebase.google.com/go v3.13.0+incompatible
 	github.com/go-playground/validator/v10 v10.16.0
 	github.com/google/uuid v1.5.0
-	github.com/labstack/echo/v4 v4.11.3
+	github.com/labstack/echo/v4 v4.11.4
 	github.com/spf13/viper v1.18.2
+	google.golang.org/api v0.156.0
 	gorm.io/driver/mysql v1.5.2
-	google.golang.org/api v0.156.0 
-	cloud.google.com/go/storage v1.36.0
 )
+
+require github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 
 require (
 	cloud.google.com/go v0.112.0 // indirect
@@ -20,7 +22,7 @@ require (
 	cloud.google.com/go/firestore v1.14.0 // indirect
 	cloud.google.com/go/iam v1.1.5 // indirect
 	cloud.google.com/go/longrunning v0.5.4 // indirect
-	 // indirect
+	// indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/go-logr/logr v1.4.1 // indirect
@@ -76,7 +78,7 @@ require (
 )
 
 require (
-	github.com/labstack/gommon v0.4.0 // indirect
+	github.com/labstack/gommon v0.4.2 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect

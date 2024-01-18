@@ -6,6 +6,7 @@ import (
 	"io"
 	"kalorize-api/domain/models"
 	"kalorize-api/domain/repositories"
+	"kalorize-api/formatter"
 	"kalorize-api/utils"
 	"path/filepath"
 	"reflect"
@@ -28,14 +29,16 @@ type UserService interface {
 }
 
 type userService struct {
-	userRepository    repositories.UserRepository
-	historyRepository repositories.HistoryRepository
+	userRepository     repositories.UserRepository
+	historyRepository  repositories.HistoryRepository
+	makananrRepository repositories.MakananRepository
 }
 
 func NewUserService(db *gorm.DB) UserService {
 	return &userService{
-		userRepository:    repositories.NewDBUserRepository(db),
-		historyRepository: repositories.NewDBHistoryRepository(db),
+		userRepository:     repositories.NewDBUserRepository(db),
+		historyRepository:  repositories.NewDBHistoryRepository(db),
+		makananrRepository: repositories.NewDBMakananRepository(db),
 	}
 }
 
@@ -116,11 +119,45 @@ func (service *userService) GetHistory(token string, date time.Time) utils.Respo
 			Data:       nil,
 		}
 	}
-	return utils.Response{
-		StatusCode: 200,
-		Messages:   "Success",
-		Data:       history,
+	breakfast, err := service.makananrRepository.GetMakananById(history.IdBreakfast)
+	formattedBreakfast := formatter.FormatterMakananLuarIndo(breakfast)
+	if err != nil {
+		return utils.Response{
+			StatusCode: 500,
+			Messages:   "Failed to get breakfast",
+			Data:       nil,
+		}
 	}
+	lunch, err := service.makananrRepository.GetMakananById(history.IdLunch)
+	formattedLunch := formatter.FormatterMakananLuarIndo(lunch)
+	if err != nil {
+		return utils.Response{
+			StatusCode: 500,
+			Messages:   "Failed to get lunch",
+			Data:       nil,
+		}
+	}
+	dinner, err := service.makananrRepository.GetMakananById(history.IdDinner)
+	formattedDinner := formatter.FormatterMakananLuarIndo(dinner)
+	if err != nil {
+		return utils.Response{
+			StatusCode: 500,
+			Messages:   "Failed to get dinner",
+			Data:       nil,
+		}
+	}
+	var response utils.Response
+	response.StatusCode = 200
+	response.Messages = "Success"
+	response.Data = map[string]interface{}{
+		"breakfast":    formattedBreakfast,
+		"lunch":        formattedLunch,
+		"dinner":       formattedDinner,
+		"totalKalori":  history.TotalKalori,
+		"totalProtein": history.TotalProtein,
+	}
+
+	return response
 }
 
 func (service *userService) EditUser(token string, payload utils.UserRequest) utils.Response {
