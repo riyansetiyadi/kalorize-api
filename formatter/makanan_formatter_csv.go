@@ -15,7 +15,6 @@ func FormatterMakananToMultiDimentionalArray(makanan []models.Makanan) [][]strin
 		var row []string
 		row = append(row, makanan[i].IdMakanan)
 		row = append(row, makanan[i].Nama)
-		row = append(row, makanan[i].Jenis)
 		row = append(row, makanan[i].Foto)
 		row = append(row, makanan[i].Bahan)
 		row = append(row, makanan[i].CookingStep)

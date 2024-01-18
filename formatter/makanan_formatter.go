@@ -20,7 +20,6 @@ func FormatterMakananLuarIndo(makanan models.Makanan) MakananFormat {
 	var makananFormatted MakananFormat
 	makananFormatted.ID = makanan.IdMakanan
 	makananFormatted.Nama = makanan.Nama
-	makananFormatted.Jenis = makanan.Jenis
 	makananFormatted.Bahan = utils.ConvertToArrayWithCommaSeparator(makanan.Bahan)
 	makananFormatted.Bahan = utils.AddNumbering(makananFormatted.Bahan)
 	makananFormatted.CookingStep = utils.ConvertToArrayWithDotSeparator(makanan.CookingStep)
@@ -35,7 +34,6 @@ func FormatterMakananIndo(makanan models.Makanan) MakananFormat {
 	var makananFormatted MakananFormat
 	makananFormatted.ID = makanan.IdMakanan
 	makananFormatted.Nama = makanan.Nama
-	makananFormatted.Jenis = makanan.Jenis
 	makananFormatted.Bahan = utils.ConvertToArrayWithDoubleLineSeparator(makanan.Bahan)
 	makananFormatted.Bahan = utils.AddNumbering(makananFormatted.Bahan)
 	makananFormatted.CookingStep = utils.ConvertToArrayWithDoubleLineSeparator(makanan.CookingStep)

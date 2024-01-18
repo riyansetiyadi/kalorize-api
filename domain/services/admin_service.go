@@ -146,7 +146,6 @@ func (service *adminService) RegisterMakanan(bearerToken string, registMakananRe
 		Nama:        registMakananRequest.Nama,
 		Kalori:      registMakananRequest.Kalori,
 		Protein:     registMakananRequest.Protein,
-		Jenis:       registMakananRequest.Jenis,
 		Bahan:       strings.Join(registMakananRequest.Bahan, ", "),
 		CookingStep: strings.Join(registMakananRequest.CookingStep, "., "),
 		CreatedAt:   models.TimeWrapper{Time: time.Now()},
