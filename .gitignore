@@ -8,4 +8,4 @@ config.yaml
 prod.yaml
 
 #ignore credentials.json file
-credentials.json
+config/credentials.json
