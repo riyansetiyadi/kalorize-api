@@ -43,7 +43,7 @@ func NewUserService(db *gorm.DB) UserService {
 }
 
 func (service *userService) CreateHistory(token string, historyPayload utils.HistoryRequest) utils.Response {
-	emailUser, err := utils.ParseData(token)
+	emailUser, err := utils.ParseDataEmail(token)
 	if err != nil || emailUser == "" {
 		return utils.Response{
 			StatusCode: 401,
@@ -93,7 +93,7 @@ func (service *userService) CreateHistory(token string, historyPayload utils.His
 }
 
 func (service *userService) GetHistory(token string, date time.Time) utils.Response {
-	emailUser, err := utils.ParseData(token)
+	emailUser, err := utils.ParseDataEmail(token)
 	if err != nil || emailUser == "" {
 		return utils.Response{
 			StatusCode: 401,
@@ -161,7 +161,7 @@ func (service *userService) GetHistory(token string, date time.Time) utils.Respo
 }
 
 func (service *userService) EditUser(token string, payload utils.UserRequest) utils.Response {
-	emailUser, err := utils.ParseData(token)
+	emailUser, err := utils.ParseDataEmail(token)
 	if err != nil || emailUser == "" {
 		return utils.Response{
 			StatusCode: 401,
@@ -218,7 +218,7 @@ func validateAndAssign(target interface{}, source interface{}) {
 }
 
 func (service *userService) EditPassword(token string, payload utils.UserRequest, oldPassword string) utils.Response {
-	emailUser, err := utils.ParseData(token)
+	emailUser, err := utils.ParseDataEmail(token)
 	if err != nil || emailUser == "" {
 		return utils.Response{
 			StatusCode: 401,
@@ -275,7 +275,7 @@ func (service *userService) EditPassword(token string, payload utils.UserRequest
 }
 
 func (service *userService) EditPhoto(token string, payload utils.UploadedPhoto) utils.Response {
-	emailUser, err := utils.ParseData(token)
+	emailUser, err := utils.ParseDataEmail(token)
 	if err != nil || emailUser == "" {
 		return utils.Response{
 			StatusCode: 401,

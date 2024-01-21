@@ -200,9 +200,9 @@ func (service *authService) Register(registerRequest utils.UserRequest, gymKode 
 
 func (service *authService) GetLoggedInUser(bearerToken string) utils.Response {
 	var response utils.Response
-	email, err := utils.ParseData(bearerToken)
-	if email != "" && err == nil {
-		user, err := service.authRepo.GetUserByEmail(email)
+	username, err := utils.ParseDataFullname(bearerToken)
+	if username != "" && err == nil {
+		user, err := service.authRepo.GetUserByUsername(username)
 		if err != nil {
 			response.StatusCode = 500
 			response.Messages = "User tidak ditemukan"

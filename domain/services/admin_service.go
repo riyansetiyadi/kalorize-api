@@ -34,7 +34,7 @@ func NewAdminService(db *gorm.DB) AdminService {
 
 func (service *adminService) RegisterGym(token string, registGymRequest utils.GymRequest) utils.Response {
 	var response utils.Response
-	adminEmail, err := utils.ParseData(token)
+	adminEmail, err := utils.ParseDataEmail(token)
 	if adminEmail == "" || err != nil {
 		response.StatusCode = 401
 		response.Messages = "Unauthorized"
@@ -80,7 +80,7 @@ func (service *adminService) RegisterGym(token string, registGymRequest utils.Gy
 
 func (service *adminService) RegisterFranchise(bearerToken string, registerFranchiseRequest utils.FranchiseRequest) utils.Response {
 	var response utils.Response
-	adminEmail, err := utils.ParseData(bearerToken)
+	adminEmail, err := utils.ParseDataEmail(bearerToken)
 	if adminEmail == "" || err != nil {
 		response.StatusCode = 401
 		response.Messages = "Unauthorized"
@@ -128,7 +128,7 @@ func (service *adminService) RegisterFranchise(bearerToken string, registerFranc
 
 func (service *adminService) RegisterMakanan(bearerToken string, registMakananRequest utils.MakananRequest) utils.Response {
 	var response utils.Response
-	adminEmail, err := utils.ParseData(bearerToken)
+	adminEmail, err := utils.ParseDataEmail(bearerToken)
 	if adminEmail == "" || err != nil {
 		response.StatusCode = 401
 		response.Messages = "Unauthorized"
