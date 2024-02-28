@@ -49,14 +49,14 @@ func (service *authService) Login(email, password string) utils.Response {
 		response.Data = nil
 		return response
 	}
-	AccessToken, err := utils.GenerateJWTAccessToken(user.Fullname, user.Email, user.Role, "kalorize")
+	AccessToken, err := utils.GenerateJWTAccessToken(user.IdUser, user.Fullname, user.Email, "kalorize")
 	if err != nil {
 		response.StatusCode = 500
 		response.Messages = "Token generation failed"
 		response.Data = nil
 		return response
 	}
-	refreshToken, err := utils.GenerateJWTRefreshToken(user.Fullname, user.Email, user.Role, "kalorize")
+	refreshToken, err := utils.GenerateJWTRefreshToken(user.IdUser, user.Fullname, user.Email, "kalorize")
 	if err != nil {
 		response.StatusCode = 500
 		response.Messages = "Token generation failed"
@@ -83,6 +83,7 @@ func (service *authService) Login(email, password string) utils.Response {
 		"accessToken":  AccessToken,
 		"refreshToken": refreshToken,
 		"role":         user.Role,
+		"userId":       user.IdUser,
 	}
 	return response
 }
@@ -128,7 +129,7 @@ func (service *authService) Register(registerRequest utils.UserRequest, gymKode 
 		response.Data = nil
 		return response
 	}
-	accessToken, err := utils.GenerateJWTAccessToken(registerRequest.Fullname, registerRequest.Email, registerRequest.Role, "kalorize")
+	accessToken, err := utils.GenerateJWTAccessToken(registerRequest.IdUser, registerRequest.Fullname, registerRequest.Email, "kalorize")
 	if err != nil {
 		response.StatusCode = 500
 		response.Messages = "Token generation failed"
@@ -136,7 +137,7 @@ func (service *authService) Register(registerRequest utils.UserRequest, gymKode 
 		return response
 	}
 
-	refreshtoken, err := utils.GenerateJWTRefreshToken(registerRequest.Fullname, registerRequest.Email, registerRequest.Role, "kalorize")
+	refreshtoken, err := utils.GenerateJWTRefreshToken(registerRequest.IdUser, registerRequest.Fullname, registerRequest.Email, "kalorize")
 	if err != nil {
 		response.StatusCode = 500
 		response.Messages = "Token generation failed"
@@ -161,7 +162,6 @@ func (service *authService) Register(registerRequest utils.UserRequest, gymKode 
 		response.Data = nil
 		return response
 	}
-
 	gym, err := service.gymRepo.GetGymById(parsedUUID)
 	if err != nil {
 		response.StatusCode = 500
@@ -188,21 +188,25 @@ func (service *authService) Register(registerRequest utils.UserRequest, gymKode 
 		response.Data = user.IdUser
 		return response
 	}
+	fmt.Print(user.IdUser)
 	response.StatusCode = 200
 	response.Messages = "success"
 	response.Data = map[string]interface{}{
 		"accessToken":  accessToken,
 		"refreshToken": refreshtoken,
 		"role":         user.Role,
+		"userId":       user.IdUser,
 	}
 	return response
 }
 
 func (service *authService) GetLoggedInUser(bearerToken string) utils.Response {
 	var response utils.Response
-	username, err := utils.ParseDataFullname(bearerToken)
-	if username != "" && err == nil {
-		user, err := service.authRepo.GetUserByUsername(username)
+	var firstname, lastname string
+	email, err := utils.ParseDataEmail(bearerToken)
+	fmt.Println(email)
+	if email != "" && err == nil {
+		user, err := service.authRepo.GetUserByEmail(email)
 		if err != nil {
 			response.StatusCode = 500
 			response.Messages = "User tidak ditemukan"
@@ -213,8 +217,13 @@ func (service *authService) GetLoggedInUser(bearerToken string) utils.Response {
 		response.StatusCode = 200
 		response.Messages = "success"
 		names := strings.Split(user.Fullname, " ")
-		firstname := names[0]
-		lastname := names[1]
+		if len(names) == 1 {
+			firstname = names[0]
+			lastname = names[0]
+		} else {
+			firstname = names[0]
+			lastname = names[len(names)-1]
+		}
 		KodeGym, err := service.usedCodeRepo.GetusedCodeByIdUser(user.IdUser)
 		if err != nil {
 			response.StatusCode = 500
@@ -255,10 +264,32 @@ func (service *authService) GetLoggedInUser(bearerToken string) utils.Response {
 	}
 }
 
+func (service *authService) Logout(bearerToken string) utils.Response {
+	var response utils.Response
+	_, err := utils.ParseDataEmail(bearerToken)
+	if err != nil {
+		response.StatusCode = 500
+		response.Messages = "Token parsing failed"
+		response.Data = nil
+		return response
+	}
+	if err != nil {
+		response.StatusCode = 500
+		response.Messages = "Token deletion failed"
+		response.Data = nil
+		return response
+	}
+	response.StatusCode = 200
+	response.Messages = "success"
+	response.Data = nil
+	return response
+}
+
 type AuthService interface {
 	Login(username, password string) utils.Response
 	Register(requestRegister utils.UserRequest, gymKode string) utils.Response
 	GetLoggedInUser(bearerToken string) utils.Response
+	Logout(bearerToken string) utils.Response
 }
 
 func NewAuthService(db *gorm.DB) AuthService {

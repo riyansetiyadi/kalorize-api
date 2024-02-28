@@ -83,3 +83,14 @@ func (controller *AuthController) GetUser(c echo.Context) error {
 	response := controller.authService.GetLoggedInUser(token)
 	return c.JSON(response.StatusCode, response)
 }
+
+func (controller *AuthController) Logout(c echo.Context) error {
+	authorizationHeader := c.Request().Header.Get("Authorization")
+	if authorizationHeader == "" || !strings.HasPrefix(authorizationHeader, "Bearer ") {
+		return c.JSON(401, "Unauthorized")
+	}
+
+	token := strings.TrimPrefix(authorizationHeader, "Bearer ")
+	response := controller.authService.Logout(token)
+	return c.JSON(response.StatusCode, response)
+}

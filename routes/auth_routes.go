@@ -13,4 +13,5 @@ func RouteAuth(apiv1 *echo.Group, db *gorm.DB) {
 	apiv1.POST("/login", authController.Login)
 	apiv1.POST("/register", authController.Register)
 	apiv1.GET("/user", authController.GetUser)
+	apiv1.POST("/logout", authController.Logout)
 }

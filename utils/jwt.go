@@ -4,13 +4,14 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/google/uuid"
 )
 
-func GenerateJWTAccessToken(fullname, email, Role, key string) (string, error) {
+func GenerateJWTAccessToken(id uuid.UUID, fullname, email, key string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"IdUser":   id,
 		"Fullname": fullname,
 		"Email":    email,
-		"Role":     Role,
 		"exp":      time.Now().Add(time.Hour * 1).Unix(),
 	})
 
@@ -21,11 +22,11 @@ func GenerateJWTAccessToken(fullname, email, Role, key string) (string, error) {
 	return tokenString, err
 }
 
-func GenerateJWTRefreshToken(fullname, email, Role, key string) (string, error) {
+func GenerateJWTRefreshToken(id uuid.UUID, fullname, email, key string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"IdUser":   id,
 		"Fullname": fullname,
 		"Email":    email,
-		"Role":     Role,
 		"exp":      time.Now().Add(time.Hour * 24).Unix(),
 	})
 

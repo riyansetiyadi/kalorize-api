@@ -5,6 +5,7 @@ import (
 	"kalorize-api/utils"
 
 	vl "github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 )
@@ -25,13 +26,13 @@ func NewQuestionnaireController(db *gorm.DB) QuestionnaireController {
 
 func (controller *QuestionnaireController) FillQuestionnaire(c echo.Context) error {
 	type payload struct {
-		IdUser       string `json:"idUser" validate:"required"`
-		Umur         int    `json:"umur"`
-		BeratBadan   int    `json:"beratBadan"`
-		TinggiBadan  int    `json:"tinggiBadan"`
-		JenisKelamin int    `json:"jenisKelamin"`
-		FrekuensiGym int    `json:"frekuensiGym"`
-		TargetKalori int    `json:"targetKalori"`
+		IdUser       uuid.UUID `json:"idUser" validate:"required"`
+		Umur         int       `json:"umur"`
+		BeratBadan   int       `json:"beratBadan"`
+		TinggiBadan  int       `json:"tinggiBadan"`
+		JenisKelamin int       `json:"jenisKelamin"`
+		FrekuensiGym int       `json:"frekuensiGym"`
+		TargetKalori int       `json:"targetKalori"`
 	}
 
 	payloadValidator := new(payload)

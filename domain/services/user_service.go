@@ -120,7 +120,6 @@ func (service *userService) GetHistory(token string, date time.Time) utils.Respo
 		}
 	}
 	breakfast, err := service.makananrRepository.GetMakananById(history.IdBreakfast)
-	formattedBreakfast := formatter.FormatterMakananLuarIndo(breakfast)
 	if err != nil {
 		return utils.Response{
 			StatusCode: 500,
@@ -128,8 +127,8 @@ func (service *userService) GetHistory(token string, date time.Time) utils.Respo
 			Data:       nil,
 		}
 	}
+	formattedBreakfast := formatter.FormatterMakananLuarIndo(breakfast)
 	lunch, err := service.makananrRepository.GetMakananById(history.IdLunch)
-	formattedLunch := formatter.FormatterMakananLuarIndo(lunch)
 	if err != nil {
 		return utils.Response{
 			StatusCode: 500,
@@ -137,8 +136,8 @@ func (service *userService) GetHistory(token string, date time.Time) utils.Respo
 			Data:       nil,
 		}
 	}
+	formattedLunch := formatter.FormatterMakananLuarIndo(lunch)
 	dinner, err := service.makananrRepository.GetMakananById(history.IdDinner)
-	formattedDinner := formatter.FormatterMakananLuarIndo(dinner)
 	if err != nil {
 		return utils.Response{
 			StatusCode: 500,
@@ -146,6 +145,7 @@ func (service *userService) GetHistory(token string, date time.Time) utils.Respo
 			Data:       nil,
 		}
 	}
+	formattedDinner := formatter.FormatterMakananLuarIndo(dinner)
 	var response utils.Response
 	response.StatusCode = 200
 	response.Messages = "Success"
@@ -161,15 +161,15 @@ func (service *userService) GetHistory(token string, date time.Time) utils.Respo
 }
 
 func (service *userService) EditUser(token string, payload utils.UserRequest) utils.Response {
-	emailUser, err := utils.ParseDataEmail(token)
-	if err != nil || emailUser == "" {
+	nameUser, err := utils.ParseDataId(token)
+	if err != nil || nameUser == uuid.Nil {
 		return utils.Response{
 			StatusCode: 401,
 			Messages:   "Unauthorized",
 			Data:       nil,
 		}
 	}
-	user, err := service.userRepository.GetUserByEmail(emailUser)
+	user, err := service.userRepository.GetUserById(nameUser)
 	if err != nil {
 		return utils.Response{
 			StatusCode: 500,
@@ -189,7 +189,6 @@ func (service *userService) EditUser(token string, payload utils.UserRequest) ut
 			Data:       nil,
 		}
 	}
-
 	return utils.Response{
 		StatusCode: 200,
 		Messages:   "Success",
