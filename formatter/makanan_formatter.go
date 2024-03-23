@@ -1,7 +1,7 @@
 package formatter
 
 import (
-	"kalorize-api/domain/models"
+	"kalorize-api/app/models"
 	"kalorize-api/utils"
 )
 

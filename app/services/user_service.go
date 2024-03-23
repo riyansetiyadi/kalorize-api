@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"kalorize-api/domain/models"
-	"kalorize-api/domain/repositories"
+	"kalorize-api/app/models"
+	"kalorize-api/app/repositories"
 	"kalorize-api/formatter"
 	"kalorize-api/utils"
 	"path/filepath"
@@ -162,7 +162,7 @@ func (service *userService) GetHistory(token string, date time.Time) utils.Respo
 
 func (service *userService) EditUser(token string, payload utils.UserRequest) utils.Response {
 	nameUser, err := utils.ParseDataId(token)
-	if err != nil || nameUser == uuid.Nil {
+	if err != nil && nameUser == uuid.Nil {
 		return utils.Response{
 			StatusCode: 401,
 			Messages:   "Unauthorized",

@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -9,12 +10,12 @@ import (
 
 func GenerateJWTAccessToken(id uuid.UUID, fullname, email, key string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"IdUser":   id,
+		"IdUser":   id.String(),
 		"Fullname": fullname,
 		"Email":    email,
 		"exp":      time.Now().Add(time.Hour * 1).Unix(),
 	})
-
+	fmt.Print(token.Claims)
 	tokenString, err := token.SignedString([]byte(key))
 	if err != nil {
 		return err.Error(), err
@@ -24,12 +25,11 @@ func GenerateJWTAccessToken(id uuid.UUID, fullname, email, key string) (string, 
 
 func GenerateJWTRefreshToken(id uuid.UUID, fullname, email, key string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"IdUser":   id,
+		"IdUser":   id.String(),
 		"Fullname": fullname,
 		"Email":    email,
 		"exp":      time.Now().Add(time.Hour * 24).Unix(),
 	})
-
 	tokenString, err := token.SignedString([]byte(key))
 	if err != nil {
 		return err.Error(), err

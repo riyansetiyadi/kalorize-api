@@ -2,8 +2,8 @@ package services
 
 import (
 	"encoding/csv"
-	"kalorize-api/domain/models"
-	"kalorize-api/domain/repositories"
+	"kalorize-api/app/models"
+	"kalorize-api/app/repositories"
 	"kalorize-api/formatter"
 	"kalorize-api/utils"
 

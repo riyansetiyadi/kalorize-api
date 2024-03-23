@@ -1,7 +1,7 @@
 package services
 
 import (
-	"kalorize-api/domain/repositories"
+	"kalorize-api/app/repositories"
 	"kalorize-api/utils"
 
 	"gorm.io/gorm"

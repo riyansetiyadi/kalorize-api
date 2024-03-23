@@ -1,7 +1,7 @@
 package repositories
 
 import (
-	"kalorize-api/domain/models"
+	"kalorize-api/app/models"
 
 	"gorm.io/gorm"
 )

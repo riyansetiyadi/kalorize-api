@@ -1,10 +1,11 @@
 package repositories
 
 import (
+	"kalorize-api/app/models"
+	"time"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
-	"kalorize-api/domain/models"
-	"time"
 )
 
 type dbHistory struct {

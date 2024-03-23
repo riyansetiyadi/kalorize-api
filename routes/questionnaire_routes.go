@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"kalorize-api/domain/controllers"
+	"kalorize-api/app/controllers"
 
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"

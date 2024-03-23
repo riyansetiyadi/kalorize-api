@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"kalorize-api/domain/services"
+	"kalorize-api/app/services"
 	"kalorize-api/utils"
 
 	vl "github.com/go-playground/validator/v10"

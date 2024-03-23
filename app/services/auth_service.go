@@ -2,8 +2,8 @@ package services
 
 import (
 	"fmt"
-	"kalorize-api/domain/models"
-	"kalorize-api/domain/repositories"
+	"kalorize-api/app/models"
+	"kalorize-api/app/repositories"
 	"kalorize-api/utils"
 	"strings"
 
@@ -129,7 +129,8 @@ func (service *authService) Register(registerRequest utils.UserRequest, gymKode 
 		response.Data = nil
 		return response
 	}
-	accessToken, err := utils.GenerateJWTAccessToken(registerRequest.IdUser, registerRequest.Fullname, registerRequest.Email, "kalorize")
+	userId := uuid.New()
+	accessToken, err := utils.GenerateJWTAccessToken(userId, registerRequest.Fullname, registerRequest.Email, "kalorize")
 	if err != nil {
 		response.StatusCode = 500
 		response.Messages = "Token generation failed"
@@ -137,14 +138,14 @@ func (service *authService) Register(registerRequest utils.UserRequest, gymKode 
 		return response
 	}
 
-	refreshtoken, err := utils.GenerateJWTRefreshToken(registerRequest.IdUser, registerRequest.Fullname, registerRequest.Email, "kalorize")
+	refreshtoken, err := utils.GenerateJWTRefreshToken(userId, registerRequest.Fullname, registerRequest.Email, "kalorize")
 	if err != nil {
 		response.StatusCode = 500
 		response.Messages = "Token generation failed"
 		response.Data = nil
 		return response
 	}
-	userId := uuid.New()
+
 	user = models.User{
 		IdUser:      userId,
 		Fullname:    registerRequest.Fullname,
@@ -188,7 +189,6 @@ func (service *authService) Register(registerRequest utils.UserRequest, gymKode 
 		response.Data = user.IdUser
 		return response
 	}
-	fmt.Print(user.IdUser)
 	response.StatusCode = 200
 	response.Messages = "success"
 	response.Data = map[string]interface{}{
@@ -203,10 +203,9 @@ func (service *authService) Register(registerRequest utils.UserRequest, gymKode 
 func (service *authService) GetLoggedInUser(bearerToken string) utils.Response {
 	var response utils.Response
 	var firstname, lastname string
-	email, err := utils.ParseDataEmail(bearerToken)
-	fmt.Println(email)
-	if email != "" && err == nil {
-		user, err := service.authRepo.GetUserByEmail(email)
+	id, err := utils.ParseDataId(bearerToken)
+	if id != uuid.Nil && err == nil {
+		user, err := service.authRepo.GetUserById(id)
 		if err != nil {
 			response.StatusCode = 500
 			response.Messages = "User tidak ditemukan"
