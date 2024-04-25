@@ -42,6 +42,7 @@ func (gymService *GymService) IsUsed(gymCode string) bool {
 	return true
 }
 
+
 func NewGymService(db *gorm.DB) *GymService {
 	return &GymService{
 		gymRepo:     repositories.NewDBGymRepository(db),

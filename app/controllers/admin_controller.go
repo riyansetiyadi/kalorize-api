@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	vl "github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 )
@@ -132,6 +133,12 @@ func (controller *AdminController) GenerateGymToken(c echo.Context) error {
 		return c.JSON(401, "Unauthorized")
 	}
 	token := strings.TrimPrefix(authorizationHeader, "Bearer ")
-	response := controller.adminService.GenerateGymToken(token)
+	uuidString := "10bedc93-46f9-4111-87ec-c9ad948aff81"
+	parsedUUID, err := uuid.Parse(uuidString)
+	if err != nil {
+		return c.JSON(400, err.Error())
+	}
+
+	response := controller.adminService.GenerateGymToken(token, parsedUUID)
 	return c.JSON(response.StatusCode, response)
 }

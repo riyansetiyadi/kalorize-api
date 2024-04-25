@@ -164,7 +164,7 @@ func (service *adminService) RegisterMakanan(bearerToken string, registMakananRe
 	return response
 }
 
-func (service *adminService) GenerateGymToken(bearerToken string) utils.Response {
+func (service *adminService) GenerateGymToken(bearerToken string, idGym uuid.UUID) utils.Response {
 	var response utils.Response
 	adminEmail, err := utils.ParseDataEmail(bearerToken)
 	if adminEmail == "" || err != nil {
@@ -180,17 +180,20 @@ func (service *adminService) GenerateGymToken(bearerToken string) utils.Response
 		response.Data = nil
 		return response
 	}
+
+	gym, err := service.gymRepo.GetGymById(idGym)
+	if err != nil {
+		response.StatusCode = 404
+		response.Messages = "Gym not found"
+		response.Data = nil
+		return response
+	}
+
 	kodeGym := models.KodeGym{
 		IdKodeGym: uuid.New(),
-		KodeGym:   uuid.New().String(),
+		KodeGym:   utils.GenerateKodeGym(gym.NamaGym),
 	}
-	//err = service.gymKode.CreateKodeGym(kodeGym)
-	// if err != nil {
-	// 	response.StatusCode = 500
-	// 	response.Messages = "Failed to create gym token"
-	// 	response.Data = nil
-	// 	return response
-	// }
+
 	response.StatusCode = 200
 	response.Messages = "Success"
 	response.Data = kodeGym
@@ -201,5 +204,5 @@ type AdminService interface {
 	RegisterGym(bearerToken string, registGymRequest utils.GymRequest) utils.Response
 	RegisterFranchise(bearerToken string, registFranchiseRequest utils.FranchiseRequest) utils.Response
 	RegisterMakanan(bearerToken string, registMakananRequest utils.MakananRequest) utils.Response
-	GenerateGymToken(bearerToken string) utils.Response
+	GenerateGymToken(bearerToken string, idGym uuid.UUID) utils.Response
 }
