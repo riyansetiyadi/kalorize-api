@@ -13,4 +13,5 @@ func RoutesAdmin(apiv1 *echo.Group, db *gorm.DB) {
 	apiv1.POST("/admin/create-makanan", adminController.RegisterMakanan)
 	apiv1.POST("/admin/create-gym", adminController.RegisterGym)
 	apiv1.POST("/admin/create-franchise", adminController.RegisterFranchise)
+	apiv1.POST("/admin/create-gymcode", adminController.GenerateGymToken)
 }
