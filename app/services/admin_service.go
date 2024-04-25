@@ -192,6 +192,8 @@ func (service *adminService) GenerateGymToken(bearerToken string, idGym uuid.UUI
 	kodeGym := models.KodeGym{
 		IdKodeGym: uuid.New(),
 		KodeGym:   utils.GenerateKodeGym(gym.NamaGym),
+		IdGym:     gym.IdGym,
+		ExpiredTime: time.Now().AddDate(0, 0, 7),
 	}
 
 	response.StatusCode = 200
