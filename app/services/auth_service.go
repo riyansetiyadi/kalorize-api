@@ -272,6 +272,8 @@ func (service *authService) Logout(bearerToken string) utils.Response {
 		response.Data = nil
 		return response
 	}
+
+	err = service.tokenRepo.DeleteToken(bearerToken)
 	if err != nil {
 		response.StatusCode = 500
 		response.Messages = "Token deletion failed"
@@ -284,11 +286,66 @@ func (service *authService) Logout(bearerToken string) utils.Response {
 	return response
 }
 
+func (service *authService) Refresh(refreshToken string) utils.Response {
+	var response utils.Response
+	userId, err := utils.ParseDataId(refreshToken)
+	if userId == uuid.Nil || err != nil {
+		response.StatusCode = 401
+		response.Messages = "Invalid token"
+		response.Data = nil
+		return response
+	}
+	user, err := service.authRepo.GetUserById(userId)
+	if err != nil {
+		response.StatusCode = 401
+		response.Messages = "User tidak ditemukan"
+		response.Data = nil
+		return response
+	}
+	AccessToken, err := utils.GenerateJWTAccessToken(user.IdUser, user.Fullname, user.Email, "kalorize")
+	if err != nil {
+		response.StatusCode = 500
+		response.Messages = "Token generation failed"
+		response.Data = nil
+		return response
+	}
+	refreshToken, err = utils.GenerateJWTRefreshToken(user.IdUser, user.Fullname, user.Email, "kalorize")
+	if err != nil {
+		response.StatusCode = 500
+		response.Messages = "Token generation failed"
+		response.Data = nil
+		return response
+	}
+	token := models.Token{
+		IdToken:      uuid.New(),
+		AccessToken:  AccessToken,
+		RefreshToken: refreshToken,
+		UserId:       user.IdUser,
+	}
+	err = service.tokenRepo.CreateNewToken(token)
+	if err != nil {
+		response.StatusCode = 500
+		response.Messages = "Token creation failed"
+		response.Data = nil
+		return response
+	}
+	response.StatusCode = 200
+	response.Messages = "success"
+	response.Data = map[string]interface{}{
+		"accessToken":  AccessToken,
+		"refreshToken": refreshToken,
+		"role":         user.Role,
+		"userId":       user.IdUser,
+	}
+	return response
+}
+
 type AuthService interface {
 	Login(username, password string) utils.Response
 	Register(requestRegister utils.UserRequest, gymKode string) utils.Response
 	GetLoggedInUser(bearerToken string) utils.Response
 	Logout(bearerToken string) utils.Response
+	Refresh(refreshToken string) utils.Response
 }
 
 func NewAuthService(db *gorm.DB) AuthService {

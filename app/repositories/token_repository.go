@@ -25,15 +25,19 @@ func (db *DbToken) UpdateToken(token models.Token) error {
 	return db.Conn.Save(&token).Error
 }
 
-func (db *DbToken) DeleteToken(idToken uuid.UUID) error {
-	return db.Conn.Delete(&models.Token{}, idToken).Error
+func (db *DbToken) DeleteToken(idToken string) error {
+	tokenUUID, err := uuid.Parse(idToken)
+	if err != nil {
+		return err
+	}
+	return db.Conn.Delete(&models.Token{}, tokenUUID).Error
 }
 
 type TokenRepository interface {
 	GetToken() ([]models.Token, error)
 	CreateNewToken(token models.Token) error
 	UpdateToken(models.Token) error
-	DeleteToken(idToken uuid.UUID) error
+	DeleteToken(idToken string) error
 }
 
 func NewDBTokenRepository(conn *gorm.DB) *DbToken {

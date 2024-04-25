@@ -24,6 +24,21 @@ func NewAuthController(db *gorm.DB) AuthController {
 	return controller
 }
 
+func (controller *AuthController) Refresh(c echo.Context) error {
+	type payload struct {
+		RefreshToken string `json:"refreshToken"`
+	}
+
+	payloadValidator := new(payload)
+
+	if err := c.Bind(payloadValidator); err != nil {
+		return c.JSON(400, err.Error())
+	}
+
+	response := controller.authService.Refresh(payloadValidator.RefreshToken)
+	return c.JSON(response.StatusCode, response)
+}
+
 func (controller *AuthController) Login(c echo.Context) error {
 	type payload struct {
 		Email    string `json:"email"`

@@ -59,7 +59,43 @@ func (service *userService) CreateHistory(token string, historyPayload utils.His
 			Data:       nil,
 		}
 	}
-	history := models.History{
+	t := time.Now()
+	tanggal := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
+
+	// Check if history already exists for the user on the same date
+	existingHistory, err := service.historyRepository.GetHistoryByIdUserAndDate(user.IdUser, tanggal)
+	if err != nil {
+		return utils.Response{
+			StatusCode: 500,
+			Messages:   "Failed to check existing history",
+			Data:       nil,
+		}
+	}
+
+	// If history exists, update it; otherwise, create a new one
+	if existingHistory != (models.History{}) {
+		existingHistory.IdBreakfast = historyPayload.IdBreakfast
+		existingHistory.IdLunch = historyPayload.IdLunch
+		existingHistory.IdDinner = historyPayload.IdDinner
+		existingHistory.TotalProtein = historyPayload.TotalProtein
+		existingHistory.TotalKalori = historyPayload.TotalKalori
+		err = service.historyRepository.UpdateHistory(existingHistory)
+		if err != nil {
+			return utils.Response{
+				StatusCode: 500,
+				Messages:   "Failed to update history",
+				Data:       nil,
+			}
+		}
+		return utils.Response{
+			StatusCode: 200,
+			Messages:   "History updated successfully",
+			Data:       existingHistory,
+		}
+	}
+
+	// Create new history if no existing history found for the user on the same date
+	newHistory := models.History{
 		IdHistory:     uuid.New(),
 		IdUser:        user.IdUser,
 		IdBreakfast:   historyPayload.IdBreakfast,
@@ -67,17 +103,9 @@ func (service *userService) CreateHistory(token string, historyPayload utils.His
 		IdDinner:      historyPayload.IdDinner,
 		TotalProtein:  historyPayload.TotalProtein,
 		TotalKalori:   historyPayload.TotalKalori,
-		TanggalDibuat: time.Now(),
+		TanggalDibuat: tanggal,
 	}
-
-	if err != nil {
-		return utils.Response{
-			StatusCode: 500,
-			Messages:   "Failed to make history model",
-			Data:       nil,
-		}
-	}
-	err = service.historyRepository.CreateHistory(history)
+	err = service.historyRepository.CreateHistory(newHistory)
 	if err != nil {
 		return utils.Response{
 			StatusCode: 500,
@@ -87,8 +115,8 @@ func (service *userService) CreateHistory(token string, historyPayload utils.His
 	}
 	return utils.Response{
 		StatusCode: 200,
-		Messages:   "Success",
-		Data:       history,
+		Messages:   "New history created successfully",
+		Data:       newHistory,
 	}
 }
 
@@ -241,13 +269,7 @@ func (service *userService) EditPassword(token string, payload utils.UserRequest
 			Data:       nil,
 		}
 	}
-	if err != nil {
-		return utils.Response{
-			StatusCode: 500,
-			Messages:   "Failed to validate old password",
-			Data:       nil,
-		}
-	}
+
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(payload.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return utils.Response{
