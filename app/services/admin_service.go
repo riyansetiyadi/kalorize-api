@@ -142,8 +142,10 @@ func (service *adminService) RegisterMakanan(bearerToken string, registMakananRe
 		response.Data = nil
 		return response
 	}
+
+	id := utils.GenerateIdMakanan(registMakananRequest.Nama)
 	makanan := models.Makanan{
-		
+		IdMakanan:     id,
 		Nama:          registMakananRequest.Nama,
 		Kalori:        registMakananRequest.Kalori,
 		Protein:       registMakananRequest.Protein,
