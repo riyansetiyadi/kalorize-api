@@ -143,6 +143,7 @@ func (service *adminService) RegisterMakanan(bearerToken string, registMakananRe
 		return response
 	}
 	makanan := models.Makanan{
+		
 		Nama:          registMakananRequest.Nama,
 		Kalori:        registMakananRequest.Kalori,
 		Protein:       registMakananRequest.Protein,
