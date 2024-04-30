@@ -143,13 +143,14 @@ func (service *adminService) RegisterMakanan(bearerToken string, registMakananRe
 		return response
 	}
 	makanan := models.Makanan{
-		Nama:        registMakananRequest.Nama,
-		Kalori:      registMakananRequest.Kalori,
-		Protein:     registMakananRequest.Protein,
-		Bahan:       strings.Join(registMakananRequest.Bahan, ", "),
-		CookingStep: strings.Join(registMakananRequest.CookingStep, "., "),
-		CreatedAt:   models.TimeWrapper{Time: time.Now()},
-		UpdatedAt:   models.TimeWrapper{Time: time.Now()},
+		Nama:          registMakananRequest.Nama,
+		Kalori:        registMakananRequest.Kalori,
+		Protein:       registMakananRequest.Protein,
+		ListFranchise: registMakananRequest.ListFranchise,
+		Bahan:         strings.Join(registMakananRequest.Bahan, ", "),
+		CookingStep:   strings.Join(registMakananRequest.CookingStep, "., "),
+		CreatedAt:     models.TimeWrapper{Time: time.Now()},
+		UpdatedAt:     models.TimeWrapper{Time: time.Now()},
 	}
 	err = service.makananRepo.CreateMakanan(makanan)
 	if err != nil {
@@ -190,9 +191,9 @@ func (service *adminService) GenerateGymToken(bearerToken string, idGym uuid.UUI
 	}
 
 	kodeGym := models.KodeGym{
-		IdKodeGym: uuid.New(),
-		KodeGym:   utils.GenerateKodeGym(gym.NamaGym),
-		IdGym:     gym.IdGym,
+		IdKodeGym:   uuid.New(),
+		KodeGym:     utils.GenerateKodeGym(gym.NamaGym),
+		IdGym:       gym.IdGym,
 		ExpiredTime: time.Now().AddDate(0, 0, 7),
 	}
 

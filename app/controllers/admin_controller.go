@@ -103,11 +103,12 @@ func (controller *AdminController) RegisterMakanan(c echo.Context) error {
 	}
 	token := strings.TrimPrefix(authorizationHeader, "Bearer ")
 	type payload struct {
-		NamaMakanan string   `json:"namaMakanan" validate:"required"`
-		Kalori      int      `json:"kalori" validate:"required"`
-		Protein     int      `json:"protein" validate:"required"`
-		Bahan       []string `json:"bahan" validate:"required"`
-		CookingStep []string `json:"cookingStep" validate:"required"`
+		NamaMakanan   string   `json:"namaMakanan" validate:"required"`
+		Kalori        int      `json:"kalori" validate:"required"`
+		Protein       int      `json:"protein" validate:"required"`
+		Bahan         []string `json:"bahan" validate:"required"`
+		ListFranchise []string `json:"listFranchise" validate:"required"`
+		CookingStep   []string `json:"cookingStep" validate:"required"`
 	}
 	payloadValidator := new(payload)
 	if err := c.Bind(payloadValidator); err != nil {
