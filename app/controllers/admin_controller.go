@@ -32,11 +32,11 @@ func (controller *AdminController) RegisterGym(c echo.Context) error {
 	}
 	token := strings.TrimPrefix(authorizationHeader, "Bearer ")
 	type payload struct {
-		NamaGym      string `json:"namaGym" validate:"required"`
-		AlamatGym    string `json:"alamatGym" validate:"required"`
-		EmailGym     string `json:"emailGym" validate:"required,email"`
-		PasswordGym  string `json:"passwordGym" validate:"required"`
-		NoTeleponGym string `json:"noTeleponGym" validate:"required"`
+		NamaGym    string  `json:"namaGym" validate:"required"`
+		AlamatGym  string  `json:"alamatGym" validate:"required"`
+		Latitude   float64 `json:"latitude" validate:"required"`
+		Longitude  float64 `json:"longitude" validate:"required"`
+		LinkGoogle string  `json:"linkGoogle" validate:"required"`
 	}
 	payloadValidator := new(payload)
 	if err := c.Bind(payloadValidator); err != nil {
@@ -47,11 +47,11 @@ func (controller *AdminController) RegisterGym(c echo.Context) error {
 		return c.JSON(400, err.Error())
 	}
 	var registGymPayload utils.GymRequest = utils.GymRequest{
-		NamaGym:      payloadValidator.NamaGym,
-		AlamatGym:    payloadValidator.AlamatGym,
-		EmailGym:     payloadValidator.EmailGym,
-		PasswordGym:  payloadValidator.PasswordGym,
-		NoTeleponGym: payloadValidator.NoTeleponGym,
+		NamaGym:    payloadValidator.NamaGym,
+		AlamatGym:  payloadValidator.AlamatGym,
+		Latitude:   payloadValidator.Latitude,
+		Longitude:  payloadValidator.Longitude,
+		LinkGoogle: payloadValidator.LinkGoogle,
 	}
 
 	response := controller.adminService.RegisterGym(token, registGymPayload)
@@ -153,7 +153,7 @@ func (controller *AdminController) RegisterUser(c echo.Context) error {
 	}
 	response := controller.adminService.RegisterUser(token, registerUserPayload)
 	return c.JSON(response.StatusCode, response)
-}	
+}
 
 func (controller *AdminController) GenerateGymToken(c echo.Context) error {
 	authorizationHeader := c.Request().Header.Get("Authorization")

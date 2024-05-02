@@ -23,25 +23,32 @@ func (gymService *GymService) CheckGymCode(gymKode string) utils.Response {
 		return utils.Response{StatusCode: 404, Messages: "Kode Gym tidak ditemukan"}
 	}
 
-	if gymService.IsUsed(kodeGym.KodeGym) {
+	if gymService.IsUsed(kodeGym.KodeGym) == (utils.Response{StatusCode: 200, Messages: "Kode Gym sudah digunakan"}) {
 		return utils.Response{StatusCode: 400, Messages: "Kode Gym sudah digunakan"}
 	}
 
 	return utils.Response{StatusCode: 200, Messages: "Kode Gym valid"}
 }
 
-func (gymService *GymService) IsUsed(gymCode string) bool {
+func (gymService *GymService) IsUsed(gymCode string) utils.Response {
 	usedCode, err := gymService.gymUsedCode.GetUsedCodeByGymCode(gymCode)
 	if err != nil {
-		return false
+		return utils.Response{StatusCode: 500, Messages: "Belum ada Gym terdaftar"}
 	}
 	if usedCode.KodeGym == "" {
-		return false
+		return utils.Response{StatusCode: 404, Messages: "Kode Gym tidak ditemukan"}
 	}
 
-	return true
+	return utils.Response{StatusCode: 200, Messages: "Kode Gym sudah digunakan"}
 }
 
+func (gymService *GymService) GetAllGym() utils.Response {
+	gym, _ := gymService.gymRepo.GetGym()
+	if gym == nil {
+		return utils.Response{StatusCode: 404, Messages: "Belum ada gym terdaftar"}
+	}
+	return utils.Response{StatusCode: 200, Messages: "Success", Data: gym}
+}
 
 func NewGymService(db *gorm.DB) *GymService {
 	return &GymService{

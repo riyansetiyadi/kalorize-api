@@ -48,21 +48,14 @@ func (service *adminService) RegisterGym(token string, registGymRequest utils.Gy
 		response.Data = nil
 		return response
 	}
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(registGymRequest.PasswordGym), bcrypt.DefaultCost)
-	if err != nil {
-		response.StatusCode = 500
-		response.Messages = "Password hashing failed"
-		response.Data = nil
-		return response
-	}
 
 	gym := models.Gym{
-		IdGym:        uuid.New(),
-		NamaGym:      registGymRequest.NamaGym,
-		AlamatGym:    registGymRequest.AlamatGym,
-		EmailGym:     registGymRequest.EmailGym,
-		PasswordGym:  string(hashedPassword),
-		NoTeleponGym: registGymRequest.NoTeleponGym,
+		IdGym:      uuid.New(),
+		NamaGym:    registGymRequest.NamaGym,
+		AlamatGym:  registGymRequest.AlamatGym,
+		Latitude:   registGymRequest.Latitude,
+		Longitude:  registGymRequest.Longitude,
+		LinkGoogle: registGymRequest.LinkGoogle,
 	}
 	err = service.gymRepo.CreateNewGym(gym)
 	if err != nil {
