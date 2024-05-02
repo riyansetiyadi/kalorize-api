@@ -149,7 +149,7 @@ func (service *adminService) RegisterMakanan(bearerToken string, registMakananRe
 		Nama:          registMakananRequest.Nama,
 		Kalori:        registMakananRequest.Kalori,
 		Protein:       registMakananRequest.Protein,
-		ListFranchise: registMakananRequest.ListFranchise,
+		ListFranchise: strings.Join(registMakananRequest.ListFranchise, ", "),
 		Bahan:         strings.Join(registMakananRequest.Bahan, ", "),
 		CookingStep:   strings.Join(registMakananRequest.CookingStep, "., "),
 		CreatedAt:     models.TimeWrapper{Time: time.Now()},
@@ -206,9 +206,61 @@ func (service *adminService) GenerateGymToken(bearerToken string, idGym uuid.UUI
 	return response
 }
 
+func (service *adminService) RegisterUser(bearerToken string, registerUserRequest utils.UserRequest) utils.Response {
+	var response utils.Response
+	adminEmail, err := utils.ParseDataEmail(bearerToken)
+	if adminEmail == "" || err != nil {
+		response.StatusCode = 401
+		response.Messages = "Unauthorized"
+		response.Data = nil
+		return response
+	}
+	admin, err := service.userRepo.GetUserByEmail(adminEmail)
+	if admin.Role != "admin" || err != nil {
+		response.StatusCode = 401
+		response.Messages = "Unauthorized"
+		response.Data = nil
+		return response
+	}
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(registerUserRequest.Password), bcrypt.DefaultCost)
+	if err != nil {
+		response.StatusCode = 500
+		response.Messages = "Password hashing failed"
+		response.Data = nil
+		return response
+	}
+
+	user := models.User{
+		IdUser:       uuid.New(),
+		Email:        registerUserRequest.Email,
+		Fullname:     registerUserRequest.Fullname,
+		Umur:         registerUserRequest.Umur,
+		BeratBadan:   registerUserRequest.BeratBadan,
+		TinggiBadan:  registerUserRequest.TinggiBadan,
+		JenisKelamin: registerUserRequest.JenisKelamin,
+		FrekuensiGym: registerUserRequest.FrekuensiGym,
+		TargetKalori: registerUserRequest.TargetKalori,
+		NoTelepon:    registerUserRequest.NoTelepon,
+		Password:     string(hashedPassword),
+		Role:         registerUserRequest.Role,
+	}
+	err = service.userRepo.CreateNewUser(user)
+	if err != nil {
+		response.StatusCode = 500
+		response.Messages = "Failed to create user"
+		response.Data = nil
+		return response
+	}
+	response.StatusCode = 200
+	response.Messages = "Success"
+	response.Data = user
+	return response
+}
+
 type AdminService interface {
 	RegisterGym(bearerToken string, registGymRequest utils.GymRequest) utils.Response
 	RegisterFranchise(bearerToken string, registFranchiseRequest utils.FranchiseRequest) utils.Response
 	RegisterMakanan(bearerToken string, registMakananRequest utils.MakananRequest) utils.Response
+	RegisterUser(bearerToken string, registerUserRequest utils.UserRequest) utils.Response
 	GenerateGymToken(bearerToken string, idGym uuid.UUID) utils.Response
 }

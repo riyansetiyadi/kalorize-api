@@ -14,7 +14,7 @@ type Makanan struct {
 	Protein       int         `json:"protein" gorm:"column:protein;type:int;"`
 	Bahan         string      `json:"bahan" gorm:"column:bahan;type:text;"`
 	CookingStep   string      `json:"cooking_step" gorm:"column:cooking_step;type:text;"`
-	ListFranchise []string    `json:"franchise" gorm:"column:franchise;type:text;"`
+	ListFranchise string      `json:"franchise" gorm:"column:franchise;type:text;"`
 	CreatedAt     TimeWrapper `json:"created_at" gorm:"column:created_at;type:timestamp;default:CURRENT_TIMESTAMP"`
 	UpdatedAt     TimeWrapper `json:"updated_at" gorm:"column:updated_at;type:timestamp;default:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"`
 }

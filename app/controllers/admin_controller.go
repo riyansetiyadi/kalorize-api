@@ -128,6 +128,33 @@ func (controller *AdminController) RegisterMakanan(c echo.Context) error {
 	return c.JSON(response.StatusCode, response)
 }
 
+func (controller *AdminController) RegisterUser(c echo.Context) error {
+	authorizationHeader := c.Request().Header.Get("Authorization")
+	if authorizationHeader == "" || !strings.HasPrefix(authorizationHeader, "Bearer ") {
+		return c.JSON(401, "Unauthorized")
+	}
+	token := strings.TrimPrefix(authorizationHeader, "Bearer ")
+	type payload struct {
+		Email    string `json:"email" validate:"required,email"`
+		Password string `json:"password" validate:"required"`
+		Role     string `json:"role" validate:"required"`
+	}
+	payloadValidator := new(payload)
+	if err := c.Bind(payloadValidator); err != nil {
+		return c.JSON(400, err.Error())
+	}
+	if err := controller.validate.Struct(payloadValidator); err != nil {
+		return c.JSON(400, err.Error())
+	}
+	var registerUserPayload utils.UserRequest = utils.UserRequest{
+		Email:    payloadValidator.Email,
+		Password: payloadValidator.Password,
+		Role:     payloadValidator.Role,
+	}
+	response := controller.adminService.RegisterUser(token, registerUserPayload)
+	return c.JSON(response.StatusCode, response)
+}	
+
 func (controller *AdminController) GenerateGymToken(c echo.Context) error {
 	authorizationHeader := c.Request().Header.Get("Authorization")
 	if authorizationHeader == "" || !strings.HasPrefix(authorizationHeader, "Bearer ") {
