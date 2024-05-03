@@ -161,12 +161,17 @@ func (controller *AdminController) GenerateGymToken(c echo.Context) error {
 		return c.JSON(401, "Unauthorized")
 	}
 	token := strings.TrimPrefix(authorizationHeader, "Bearer ")
-	uuidString := "10bedc93-46f9-4111-87ec-c9ad948aff81"
-	parsedUUID, err := uuid.Parse(uuidString)
-	if err != nil {
+
+	type payload struct {
+		Uid uuid.UUID `json:"uid" validate:"required"`
+	}
+	payloadValidator := new(payload)
+	if err := c.Bind(payloadValidator); err != nil {
 		return c.JSON(400, err.Error())
 	}
-
-	response := controller.adminService.GenerateGymToken(token, parsedUUID)
+	if err := controller.validate.Struct(payloadValidator); err != nil {
+		return c.JSON(400, err.Error())
+	}
+	response := controller.adminService.GenerateGymToken(token, payloadValidator.Uid)
 	return c.JSON(response.StatusCode, response)
 }
