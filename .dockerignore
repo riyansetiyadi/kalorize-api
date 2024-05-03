@@ -1,5 +1,5 @@
 # flyctl launch added from .gitignore
-# Ignore vendor directory
+# Ignore vendor dir
 **\vendor
 
 # flyctl launch added from vendor\github.com\dgrijalva\jwt-go\.gitignore

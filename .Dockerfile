@@ -1,6 +1,6 @@
     FROM golang:1.19-alpine
     LABEL version="1.0"
-    LABEL maintainer="GloriousSatria"
+    LABEL maintainer="Glorious Satria Dhamang Aji"
     WORKDIR /app
     COPY . . 
     RUN go mod tidy

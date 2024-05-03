@@ -7,5 +7,5 @@ config.yaml
 #igonre prod.yaml file
 prod.yaml
 
-#ignore credentials.json file
+#ignore credentials.json files
 config/credentials.json
