@@ -1,6 +1,7 @@
 package services
 
 import (
+	"kalorize-api/app/models"
 	"kalorize-api/app/repositories"
 	"kalorize-api/utils"
 
@@ -48,6 +49,16 @@ func (gymService *GymService) GetAllGym() utils.Response {
 		return utils.Response{StatusCode: 404, Messages: "Belum ada gym terdaftar"}
 	}
 	return utils.Response{StatusCode: 200, Messages: "Success", Data: gym}
+}
+
+func (gymService *GymService) FindGymFromGymCode(gymCode string) (models.Gym, error) {
+	var gym models.Gym
+	gymName := utils.GetAlphabetFromCode(gymCode)
+	gym, err := gymService.gymRepo.GetGymByGymName(gymName)
+	if err != nil {
+		return gym, err
+	}
+	return gym, nil
 }
 
 func NewGymService(db *gorm.DB) *GymService {

@@ -17,6 +17,12 @@ func (db *dbGym) GetGym() ([]models.Gym, error) {
 	return gym, err
 }
 
+func (db *dbGym) GetGymByGymName(gymName string) (models.Gym, error) {
+	var gym models.Gym
+	err := db.Conn.Where("nama LIKE ?", "%"+gymName+"%").First(&gym).Error
+	return gym, err
+}
+
 func (db *dbGym) CreateNewGym(gym models.Gym) error {
 	return db.Conn.Create(&gym).Error
 }
@@ -31,7 +37,7 @@ func (db *dbGym) DeleteGym(idGym uuid.UUID) error {
 
 func (db *dbGym) GetGymById(idGym uuid.UUID) (models.Gym, error) {
 	var gym models.Gym
-	err := db.Conn.Where("id_gym = ?", idGym).First(&gym).Error
+	err := db.Conn.Where("id = ?", idGym).First(&gym).Error
 	return gym, err
 }
 
@@ -41,6 +47,7 @@ type GymRepository interface {
 	UpdateGym(gym models.Gym) error
 	DeleteGym(idGym uuid.UUID) error
 	GetGymById(idGym uuid.UUID) (models.Gym, error)
+	GetGymByGymName(gymName string) (models.Gym, error)
 }
 
 func NewDBGymRepository(conn *gorm.DB) *dbGym {

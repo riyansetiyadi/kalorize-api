@@ -111,10 +111,6 @@ func (service *authService) Register(registerRequest utils.UserRequest, gymKode 
 		return response
 	}
 
-	// if service.authRepo.FindReferalCodeIfExist(registerRequest.ReferalCode) == true {
-	// 	adain special service untuk user
-	// }
-
 	if registerRequest.Password != registerRequest.PasswordConfirmation {
 		response.StatusCode = 400
 		response.Messages = "Password dan konfirmasi password tidak sama"
@@ -155,21 +151,7 @@ func (service *authService) Register(registerRequest utils.UserRequest, gymKode 
 		Password:    string(hashedPassword),
 		Role:        registerRequest.Role,
 	}
-	uuidString := "10bedc93-46f9-4111-87ec-c9ad948aff81"
-	parsedUUID, err := uuid.Parse(uuidString)
-	if err != nil {
-		response.StatusCode = 500
-		response.Messages = "Gym tidak ditemukan"
-		response.Data = nil
-		return response
-	}
-	gym, err := service.gymRepo.GetGymById(parsedUUID)
-	if err != nil {
-		response.StatusCode = 500
-		response.Messages = "Gym tidak ditemukan"
-		response.Data = nil
-		return response
-	}
+	gym, err := service.gymRepo.GetGymByGymName(utils.GetAlphabetFromCode(gymKode))
 	usedCode := models.UsedCode{
 		IdGym:   gym.IdGym,
 		KodeGym: gymKode,
