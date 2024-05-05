@@ -19,6 +19,6 @@ type MakananRequest struct {
 func GenerateIdMakanan(namaMakanan string) string {
 	rand.Seed(time.Now().UnixNano())
 	randomNumber := rand.Intn(901) + 100
-	idMakanan := namaMakanan + "_" + strconv.Itoa(randomNumber)
+	idMakanan := strconv.Itoa(randomNumber)
 	return idMakanan
 }
