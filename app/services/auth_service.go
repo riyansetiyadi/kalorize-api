@@ -152,6 +152,14 @@ func (service *authService) Register(registerRequest utils.UserRequest, gymKode 
 		Role:        registerRequest.Role,
 	}
 	gym, err := service.gymRepo.GetGymByGymName(utils.GetAlphabetFromCode(gymKode))
+	if err != nil {
+
+		response.StatusCode = 500
+		response.Messages = "Gym tidak ditemukan"
+		response.Data = nil
+		return response
+	}
+
 	usedCode := models.UsedCode{
 		IdGym:   gym.IdGym,
 		KodeGym: gymKode,

@@ -61,7 +61,7 @@ func (controller *AuthController) Register(c echo.Context) error {
 		Email                string `json:"email" validate:"required,email"`
 		Password             string `json:"password" validate:"required"`
 		PasswordConfirmation string `json:"passwordConfirmation" validate:"required,eqfield=Password"`
-		GymKode              string `json:"gymKode" validate:"required"`
+		GymKode              string `json:"gymKode"`
 		ReferalCode          string `json:"referalCode"`
 		Role                 string `json:"role"`
 	}

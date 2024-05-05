@@ -145,8 +145,6 @@ func (service *adminService) RegisterMakanan(bearerToken string, registMakananRe
 		ListFranchise: strings.Join(registMakananRequest.ListFranchise, ", "),
 		Bahan:         strings.Join(registMakananRequest.Bahan, ", "),
 		CookingStep:   strings.Join(registMakananRequest.CookingStep, "., "),
-		CreatedAt:     models.TimeWrapper{Time: time.Now()},
-		UpdatedAt:     models.TimeWrapper{Time: time.Now()},
 	}
 	err = service.makananRepo.CreateMakanan(makanan)
 	if err != nil {
