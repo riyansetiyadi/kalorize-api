@@ -24,13 +24,13 @@ func InitDB() *gorm.DB {
 	viper.SetConfigFile("prod.yaml")
 	err := viper.ReadInConfig()
 	if err != nil {
-		fmt.Println("Error reading config file:", err)
+		fmt.Println("Error reading config file :", err)
 		return nil
 	}
 	var config Config
 	err = viper.Unmarshal(&config)
 	if err != nil {
-		fmt.Println("Error unmarshalling config:", err)
+		fmt.Println("Error unmarshalling config :", err)
 		return nil
 	}
 
