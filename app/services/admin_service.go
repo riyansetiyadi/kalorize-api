@@ -1,14 +1,21 @@
 package services
 
 import (
+	"context"
+	"fmt"
+	"io"
 	"kalorize-api/app/models"
 	"kalorize-api/app/repositories"
 	"kalorize-api/utils"
+	"path/filepath"
 	"strings"
 	"time"
 
+	"cloud.google.com/go/storage"
+	firebase "firebase.google.com/go"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
+	"google.golang.org/api/option"
 	"gorm.io/gorm"
 )
 
@@ -32,7 +39,7 @@ func NewAdminService(db *gorm.DB) AdminService {
 	}
 }
 
-func (service *adminService) RegisterGym(token string, registGymRequest utils.GymRequest) utils.Response {
+func (service *adminService) RegisterGym(token string, registGymRequest utils.GymRequest, photoRequest utils.UploadedPhoto) utils.Response {
 	var response utils.Response
 	adminEmail, err := utils.ParseDataEmail(token)
 	if adminEmail == "" || err != nil {
@@ -57,6 +64,64 @@ func (service *adminService) RegisterGym(token string, registGymRequest utils.Gy
 		Longitude:  registGymRequest.Longitude,
 		LinkGoogle: registGymRequest.LinkGoogle,
 	}
+
+	// Initialize Firebase app
+	opt := option.WithCredentialsFile("config/credentials.json")
+	app, err := firebase.NewApp(context.Background(), nil, opt)
+	if err != nil {
+		response.StatusCode = 500
+		response.Messages = "Failed to initialize Firebase app"
+		response.Data = nil
+		return response
+	}
+
+	// Initialize Firebase Storage client
+	client, err := app.Storage(context.Background())
+	if err != nil {
+		response.StatusCode = 500
+		response.Messages = "Failed to initialize Firebase Storage client"
+		response.Data = nil
+		return response
+	}
+
+	// Specify the path within the bucket where the file should be stored
+	storagePath := fmt.Sprintf("images/%s", photoRequest.Handler.Filename)
+
+	// Open a new reader for the file
+	reader := photoRequest.File
+
+	// Get the bucket handle from the client
+	bucket, err := client.Bucket("kalorize-71324.appspot.com")
+	if err != nil {
+		response.StatusCode = 500
+		response.Messages = "Failed to get bucket handle from the client"
+		response.Data = nil
+		return response
+	}
+
+	// Initialize the writer for the file
+	wc := bucket.Object(storagePath).NewWriter(context.Background())
+	wc.ACL = []storage.ACLRule{{Entity: storage.AllUsers, Role: storage.RoleReader}}
+
+	// Upload the file to Firebase Storage
+	if _, err := io.Copy(wc, reader); err != nil {
+		response.StatusCode = 500
+		response.Messages = "Failed to upload file to Firebase Storage"
+		response.Data = nil
+		return response
+	}
+
+	// Close the writer after copying
+	if err := wc.Close(); err != nil {
+		response.StatusCode = 500
+		response.Messages = "Failed to close Firebase Storage writer"
+		response.Data = nil
+		return response
+	}
+
+	// Set gym properties
+	gym.PhotoGym = photoRequest.Alias + filepath.Ext(photoRequest.Handler.Filename)
+	gym.PhotoUrl = fmt.Sprintf("https://storage.googleapis.com/kalorize-71324.appspot.com/%s", storagePath)
 	err = service.gymRepo.CreateNewGym(gym)
 	if err != nil {
 		response.StatusCode = 500
@@ -64,7 +129,6 @@ func (service *adminService) RegisterGym(token string, registGymRequest utils.Gy
 		response.Data = nil
 		return response
 	}
-
 	response.StatusCode = 200
 	response.Messages = "Success"
 	response.Data = gym
@@ -249,7 +313,7 @@ func (service *adminService) RegisterUser(bearerToken string, registerUserReques
 }
 
 type AdminService interface {
-	RegisterGym(bearerToken string, registGymRequest utils.GymRequest) utils.Response
+	RegisterGym(bearerToken string, registGymRequest utils.GymRequest, photoRequest utils.UploadedPhoto) utils.Response
 	RegisterFranchise(bearerToken string, registFranchiseRequest utils.FranchiseRequest) utils.Response
 	RegisterMakanan(bearerToken string, registMakananRequest utils.MakananRequest) utils.Response
 	RegisterUser(bearerToken string, registerUserRequest utils.UserRequest) utils.Response

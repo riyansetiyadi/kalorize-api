@@ -155,7 +155,7 @@ func (service *userService) GetHistory(token string, date time.Time) utils.Respo
 			Data:       nil,
 		}
 	}
-	formattedBreakfast := formatter.FormatterMakananLuarIndo(breakfast)
+	formattedBreakfast := formatter.FormatterMakananIndo(breakfast)
 	lunch, err := service.makananrRepository.GetMakananById(history.IdLunch)
 	if err != nil {
 		return utils.Response{
@@ -164,7 +164,7 @@ func (service *userService) GetHistory(token string, date time.Time) utils.Respo
 			Data:       nil,
 		}
 	}
-	formattedLunch := formatter.FormatterMakananLuarIndo(lunch)
+	formattedLunch := formatter.FormatterMakananIndo(lunch)
 	dinner, err := service.makananrRepository.GetMakananById(history.IdDinner)
 	if err != nil {
 		return utils.Response{
@@ -173,7 +173,7 @@ func (service *userService) GetHistory(token string, date time.Time) utils.Respo
 			Data:       nil,
 		}
 	}
-	formattedDinner := formatter.FormatterMakananLuarIndo(dinner)
+	formattedDinner := formatter.FormatterMakananIndo(dinner)
 	var response utils.Response
 	response.StatusCode = 200
 	response.Messages = "Success"

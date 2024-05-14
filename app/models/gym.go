@@ -11,6 +11,8 @@ type Gym struct {
 	Latitude   float64   `json:"latitude" gorm:"column:latitude;type:double;"`
 	Longitude  float64   `json:"longitude" gorm:"column:longitude;type:double;"`
 	LinkGoogle string    `json:"link_google" gorm:"column:link_google;type:varchar(255);"`
+	PhotoGym   string    `json:"photo_gym" gorm:"column:photo_gym;type:varchar(255);"`
+	PhotoUrl   string    `json:"photo_url" gorm:"column:photo_url;type:varchar(255);"`
 }
 
 func (Gym) TableName() string {

@@ -6,7 +6,18 @@ import (
 )
 
 func ConvertToArrayWithCommaSeparator(String string) []string {
-	return strings.Split(String, ". ")
+	return strings.Split(String, ", ")
+}
+
+func CleanAngleBracketsinString(String string) string {
+
+	String = strings.ReplaceAll(String, "[", "")
+	String = strings.ReplaceAll(String, "]", "")
+	return String
+}
+
+func CleanSingleQuoteinString(String string) string {
+	return strings.ReplaceAll(String, "'", "")
 }
 
 func ConvertToArrayWithDotSeparator(String string) []string {

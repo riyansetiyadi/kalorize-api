@@ -3,6 +3,7 @@ package controllers
 import (
 	"kalorize-api/app/services"
 	"kalorize-api/utils"
+	"net/http"
 	"strings"
 
 	vl "github.com/go-playground/validator/v10"
@@ -32,12 +33,13 @@ func (controller *AdminController) RegisterGym(c echo.Context) error {
 	}
 	token := strings.TrimPrefix(authorizationHeader, "Bearer ")
 	type payload struct {
-		NamaGym    string  `json:"namaGym" validate:"required"`
-		AlamatGym  string  `json:"alamatGym" validate:"required"`
-		Latitude   float64 `json:"latitude" validate:"required"`
-		Longitude  float64 `json:"longitude" validate:"required"`
-		LinkGoogle string  `json:"linkGoogle" validate:"required"`
+		NamaGym    string  `form:"namaGym" validate:"required"`
+		AlamatGym  string  `form:"alamatGym" validate:"required"`
+		Latitude   float64 `form:"latitude" validate:"required"`
+		Longitude  float64 `form:"longitude" validate:"required"`
+		LinkGoogle string  `form:"linkGoogle" validate:"required"`
 	}
+
 	payloadValidator := new(payload)
 	if err := c.Bind(payloadValidator); err != nil {
 		return c.JSON(400, err.Error())
@@ -46,6 +48,7 @@ func (controller *AdminController) RegisterGym(c echo.Context) error {
 	if err := controller.validate.Struct(payloadValidator); err != nil {
 		return c.JSON(400, err.Error())
 	}
+
 	var registGymPayload utils.GymRequest = utils.GymRequest{
 		NamaGym:    payloadValidator.NamaGym,
 		AlamatGym:  payloadValidator.AlamatGym,
@@ -54,7 +57,23 @@ func (controller *AdminController) RegisterGym(c echo.Context) error {
 		LinkGoogle: payloadValidator.LinkGoogle,
 	}
 
-	response := controller.adminService.RegisterGym(token, registGymPayload)
+	if err := c.Request().ParseMultipartForm(1024); err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+
+	alias := c.Request().FormValue("alias")
+	uploadedFile, handler, err := c.Request().FormFile("file")
+	if err != nil {
+		return c.JSON(400, err.Error())
+	}
+
+	photoRequest := utils.UploadedPhoto{
+		Alias:   alias,
+		File:    uploadedFile,
+		Handler: handler,
+	}
+
+	response := controller.adminService.RegisterGym(token, registGymPayload, photoRequest)
 	return c.JSON(response.StatusCode, response)
 }
 

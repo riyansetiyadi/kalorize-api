@@ -13,7 +13,7 @@ func GenerateJWTAccessToken(id uuid.UUID, fullname, email, key string) (string, 
 		"IdUser":   id.String(),
 		"Fullname": fullname,
 		"Email":    email,
-		"exp":      time.Now().Add(time.Hour * 1).Unix(),
+		"exp":      time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day()+1, 0, 0, 0, 0, time.Now().Location()).Unix(),
 	})
 	fmt.Print(token.Claims)
 	tokenString, err := token.SignedString([]byte(key))

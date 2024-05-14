@@ -96,17 +96,17 @@ func (service *authService) Register(registerRequest utils.UserRequest, gymKode 
 		response.Data = nil
 		return response
 	}
-	user, err := service.authRepo.GetUserByEmail(registerRequest.Email)
-	if err == nil {
+	if !utils.IsEmailValid(registerRequest.Email) {
 		response.StatusCode = 400
-		response.Messages = "Email sudah terdaftar"
+		response.Messages = "Email kamu tidak valid"
 		response.Data = nil
 		return response
 	}
 
-	if !utils.IsEmailValid(registerRequest.Email) {
+	user, err := service.authRepo.GetUserByEmail(registerRequest.Email)
+	if err == nil {
 		response.StatusCode = 400
-		response.Messages = "Email kamu tidak valid"
+		response.Messages = "Email sudah terdaftar"
 		response.Data = nil
 		return response
 	}
@@ -151,26 +151,27 @@ func (service *authService) Register(registerRequest utils.UserRequest, gymKode 
 		Password:    string(hashedPassword),
 		Role:        registerRequest.Role,
 	}
-	gym, err := service.gymRepo.GetGymByGymName(utils.GetAlphabetFromCode(gymKode))
-	if err != nil {
+	if registerRequest.Role != "admin" {
+		gym, err := service.gymRepo.GetGymByGymName(utils.GetAlphabetFromCode(gymKode))
+		if err != nil {
+			response.StatusCode = 500
+			response.Messages = "Gym tidak ditemukan"
+			response.Data = nil
+			return response
+		}
 
-		response.StatusCode = 500
-		response.Messages = "Gym tidak ditemukan"
-		response.Data = nil
-		return response
-	}
-
-	usedCode := models.UsedCode{
-		IdGym:   gym.IdGym,
-		KodeGym: gymKode,
-		IdUser:  user.IdUser,
-	}
-	err = service.usedCodeRepo.CreateNewUsedCode(usedCode)
-	if err != nil {
-		response.StatusCode = 500
-		response.Messages = "Used code creation failed"
-		response.Data = user.IdUser
-		return response
+		usedCode := models.UsedCode{
+			IdGym:   gym.IdGym,
+			KodeGym: gymKode,
+			IdUser:  user.IdUser,
+		}
+		err = service.usedCodeRepo.CreateNewUsedCode(usedCode)
+		if err != nil {
+			response.StatusCode = 500
+			response.Messages = "Used code creation failed"
+			response.Data = user.IdUser
+			return response
+		}
 	}
 	err = service.authRepo.CreateNewUser(user)
 	if err != nil {
@@ -213,36 +214,51 @@ func (service *authService) GetLoggedInUser(bearerToken string) utils.Response {
 			firstname = names[0]
 			lastname = names[len(names)-1]
 		}
-		KodeGym, err := service.usedCodeRepo.GetusedCodeByIdUser(user.IdUser)
-		if err != nil {
-			response.StatusCode = 500
-			response.Messages = "Kode gym tidak ditemukan"
-			response.Data = nil
-			return response
-		}
-		Gym, err := service.gymRepo.GetGymById(KodeGym.IdGym)
-		if err != nil {
-			response.StatusCode = 500
-			response.Messages = "Gym tidak ditemukan"
-			response.Data = nil
-			return response
-		}
-		response.Data = map[string]interface{}{
-			"idUser":       user.IdUser,
-			"firstName":    firstname,
-			"lastName":     lastname,
-			"email":        user.Email,
-			"jenisKelamin": user.JenisKelamin,
-			"frekuensiGym": user.FrekuensiGym,
-			"targetKalori": user.TargetKalori,
-			"tinggiBadan":  user.TinggiBadan,
-			"umur":         user.Umur,
-			"beratBadan":   user.BeratBadan,
-			"role":         user.Role,
-			"foto":         user.FotoUrl,
-			"noTelepon":    user.NoTelepon,
-			"KodeGym":      KodeGym.KodeGym,
-			"Gym":          Gym.NamaGym,
+		if user.Role != "admin" {
+			KodeGym, err := service.usedCodeRepo.GetusedCodeByIdUser(user.IdUser)
+			if err != nil {
+				response.StatusCode = 500
+				response.Messages = "Kode gym tidak ditemukan"
+				response.Data = nil
+				return response
+			}
+			Gym, err := service.gymRepo.GetGymById(KodeGym.IdGym)
+			if err != nil {
+				response.StatusCode = 500
+				response.Messages = "Gym tidak ditemukan"
+				response.Data = nil
+				return response
+			}
+			response.Data = map[string]interface{}{
+				"idUser":       user.IdUser,
+				"firstName":    firstname,
+				"lastName":     lastname,
+				"email":        user.Email,
+				"jenisKelamin": user.JenisKelamin,
+				"frekuensiGym": user.FrekuensiGym,
+				"targetKalori": user.TargetKalori,
+				"tinggiBadan":  user.TinggiBadan,
+				"umur":         user.Umur,
+				"beratBadan":   user.BeratBadan,
+				"role":         user.Role,
+				"foto":         user.FotoUrl,
+				"noTelepon":    user.NoTelepon,
+				"KodeGym":      KodeGym.KodeGym,
+				"Gym":          Gym.NamaGym,
+			}
+		} else {
+			response.Data = map[string]interface{}{
+				"idUser":       user.IdUser,
+				"firstName":    firstname,
+				"lastName":     lastname,
+				"email":        user.Email,
+				"jenisKelamin": user.JenisKelamin,
+				"umur":         user.Umur,
+				"beratBadan":   user.BeratBadan,
+				"role":         user.Role,
+				"foto":         user.FotoUrl,
+				"noTelepon":    user.NoTelepon,
+			}
 		}
 		return response
 	} else {
