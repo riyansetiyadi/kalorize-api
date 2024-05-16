@@ -312,10 +312,152 @@ func (service *adminService) RegisterUser(bearerToken string, registerUserReques
 	return response
 }
 
+func (service *adminService) GetAllUser(bearerToken string) utils.Response {
+	var response utils.Response
+	adminEmail, err := utils.ParseDataEmail(bearerToken)
+	if adminEmail == "" || err != nil {
+		response.StatusCode = 401
+		response.Messages = "Unauthorized"
+		response.Data = nil
+		return response
+	}
+	admin, err := service.userRepo.GetUserByEmail(adminEmail)
+	if admin.Role != "admin" || err != nil {
+		response.StatusCode = 401
+		response.Messages = "Unauthorized"
+		response.Data = nil
+		return response
+	}
+
+	users, err := service.userRepo.GetAllUser()
+	if err != nil {
+		response.StatusCode = 500
+		response.Messages = "Failed to get all user"
+		response.Data = nil
+		return response
+	}
+	response.StatusCode = 200
+	response.Messages = "Success"
+	response.Data = users
+	return response
+}
+
+func (service *adminService) GetUserById(bearerToken string, id uuid.UUID) utils.Response {
+	var response utils.Response
+	adminEmail, err := utils.ParseDataEmail(bearerToken)
+	if adminEmail == "" || err != nil {
+		response.StatusCode = 401
+		response.Messages = "Unauthorized"
+		response.Data = nil
+		return response
+	}
+	admin, err := service.userRepo.GetUserByEmail(adminEmail)
+	if admin.Role != "admin" || err != nil {
+		response.StatusCode = 401
+		response.Messages = "Unauthorized"
+		response.Data = nil
+		return response
+	}
+
+	user, err := service.userRepo.GetUserById(id)
+	if err != nil {
+		response.StatusCode = 404
+		response.Messages = "User not found"
+		response.Data = nil
+		return response
+	}
+	response.StatusCode = 200
+	response.Messages = "Success"
+	response.Data = user
+	return response
+}
+
+func (service *adminService) UpdateUser(bearerToken string, id uuid.UUID, updateUserRequest utils.UserRequest) utils.Response {
+	var response utils.Response
+	adminEmail, err := utils.ParseDataEmail(bearerToken)
+	if adminEmail == "" || err != nil {
+		response.StatusCode = 401
+		response.Messages = "Unauthorized"
+		response.Data = nil
+		return response
+	}
+	admin, err := service.userRepo.GetUserByEmail(adminEmail)
+	if admin.Role != "admin" || err != nil {
+		response.StatusCode = 401
+		response.Messages = "Unauthorized"
+		response.Data = nil
+		return response
+	}
+
+	user, err := service.userRepo.GetUserById(id)
+	if err != nil {
+		response.StatusCode = 404
+		response.Messages = "User not found"
+		response.Data = nil
+		return response
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(updateUserRequest.Password), bcrypt.DefaultCost)
+	if err != nil {
+		response.StatusCode = 500
+		response.Messages = "Password hashing failed"
+		response.Data = nil
+		return response
+	}
+
+	user.Email = updateUserRequest.Email
+	user.Password = string(hashedPassword)
+	user.Role = updateUserRequest.Role
+	err = service.userRepo.UpdateUser(user)
+	if err != nil {
+		response.StatusCode = 500
+		response.Messages = "Failed to update user"
+		response.Data = nil
+		return response
+	}
+	response.StatusCode = 200
+	response.Messages = "Success"
+	response.Data = user
+	return response
+}
+
+func (service *adminService) DeleteUser(bearerToken string, id uuid.UUID) utils.Response {
+	var response utils.Response
+	adminEmail, err := utils.ParseDataEmail(bearerToken)
+	if adminEmail == "" || err != nil {
+		response.StatusCode = 401
+		response.Messages = "Unauthorized"
+		response.Data = nil
+		return response
+	}
+	admin, err := service.userRepo.GetUserByEmail(adminEmail)
+	if admin.Role != "admin" || err != nil {
+		response.StatusCode = 401
+		response.Messages = "Unauthorized"
+		response.Data = nil
+		return response
+	}
+
+	err = service.userRepo.DeleteUser(id)
+	if err != nil {
+		response.StatusCode = 500
+		response.Messages = "Failed to delete user"
+		response.Data = nil
+		return response
+	}
+	response.StatusCode = 200
+	response.Messages = "Success"
+	return response
+}
+
 type AdminService interface {
 	RegisterGym(bearerToken string, registGymRequest utils.GymRequest, photoRequest utils.UploadedPhoto) utils.Response
 	RegisterFranchise(bearerToken string, registFranchiseRequest utils.FranchiseRequest) utils.Response
 	RegisterMakanan(bearerToken string, registMakananRequest utils.MakananRequest) utils.Response
 	RegisterUser(bearerToken string, registerUserRequest utils.UserRequest) utils.Response
 	GenerateGymToken(bearerToken string, idGym uuid.UUID) utils.Response
+	GetAllUser(bearerToken string) utils.Response
+	GetUserById(bearerToken string, id uuid.UUID) utils.Response
+	UpdateUser(bearerToken string, id uuid.UUID, updateUserRequest utils.UserRequest) utils.Response
+	DeleteUser(bearerToken string, id uuid.UUID) utils.Response
 }

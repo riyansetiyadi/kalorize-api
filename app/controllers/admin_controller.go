@@ -194,3 +194,69 @@ func (controller *AdminController) GenerateGymToken(c echo.Context) error {
 	response := controller.adminService.GenerateGymToken(token, payloadValidator.Uid)
 	return c.JSON(response.StatusCode, response)
 }
+
+func (controller *AdminController) GetAllUser(c echo.Context) error {
+	authorizationHeader := c.Request().Header.Get("Authorization")
+	if authorizationHeader == "" || !strings.HasPrefix(authorizationHeader, "Bearer ") {
+		return c.JSON(401, "Unauthorized")
+	}
+	token := strings.TrimPrefix(authorizationHeader, "Bearer ")
+	response := controller.adminService.GetAllUser(token)
+	return c.JSON(response.StatusCode, response)
+}
+
+func (controller *AdminController) GetUserById(c echo.Context) error {
+	authorizationHeader := c.Request().Header.Get("Authorization")
+	if authorizationHeader == "" || !strings.HasPrefix(authorizationHeader, "Bearer ") {
+		return c.JSON(401, "Unauthorized")
+	}
+	token := strings.TrimPrefix(authorizationHeader, "Bearer ")
+
+	id := c.Param("id")
+	uuid := uuid.MustParse(id)
+	response := controller.adminService.GetUserById(token, uuid)
+	return c.JSON(response.StatusCode, response)
+}
+
+func (controller *AdminController) UpdateUser(c echo.Context) error {
+	authorizationHeader := c.Request().Header.Get("Authorization")
+	if authorizationHeader == "" || !strings.HasPrefix(authorizationHeader, "Bearer ") {
+		return c.JSON(401, "Unauthorized")
+	}
+	token := strings.TrimPrefix(authorizationHeader, "Bearer ")
+
+	id := c.Param("id")
+	uuid := uuid.MustParse(id)
+	type payload struct {
+		Email    string `json:"email" validate:"required,email"`
+		Password string `json:"password" validate:"required"`
+		Role     string `json:"role" validate:"required"`
+	}
+	payloadValidator := new(payload)
+	if err := c.Bind(payloadValidator); err != nil {
+		return c.JSON(400, err.Error())
+	}
+	if err := controller.validate.Struct(payloadValidator); err != nil {
+		return c.JSON(400, err.Error())
+	}
+	var updateUserPayload utils.UserRequest = utils.UserRequest{
+		Email:    payloadValidator.Email,
+		Password: payloadValidator.Password,
+		Role:     payloadValidator.Role,
+	}
+	response := controller.adminService.UpdateUser(token, uuid, updateUserPayload)
+	return c.JSON(response.StatusCode, response)
+}
+
+func (controller *AdminController) DeleteUser(c echo.Context) error {
+	authorizationHeader := c.Request().Header.Get("Authorization")
+	if authorizationHeader == "" || !strings.HasPrefix(authorizationHeader, "Bearer ") {
+		return c.JSON(401, "Unauthorized")
+	}
+	token := strings.TrimPrefix(authorizationHeader, "Bearer ")
+
+	id := c.Param("id")
+	uuid := uuid.MustParse(id)
+	response := controller.adminService.DeleteUser(token, uuid)
+	return c.JSON(response.StatusCode, response)
+}

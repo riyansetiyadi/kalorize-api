@@ -62,9 +62,8 @@ func (service *makananService) GetMakananById(id string) utils.Response {
 		response.Data = nil
 		return response
 	}
-	var formattedMakanan formatter.MakananFormat
 
-	formattedMakanan = formatter.FormatterMakananIndo(makanan)
+	formattedMakanan := formatter.FormatterMakananIndo(makanan)
 
 	response.StatusCode = 200
 	response.Messages = "success"

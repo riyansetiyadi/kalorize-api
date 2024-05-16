@@ -6,6 +6,7 @@ import (
 	"kalorize-api/app/repositories"
 	"kalorize-api/utils"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -161,9 +162,10 @@ func (service *authService) Register(registerRequest utils.UserRequest, gymKode 
 		}
 
 		usedCode := models.UsedCode{
-			IdGym:   gym.IdGym,
-			KodeGym: gymKode,
-			IdUser:  user.IdUser,
+			IdGym:     gym.IdGym,
+			KodeGym:   gymKode,
+			IdUser:    user.IdUser,
+			ExpiredAt: utils.GetExpiredTimeGym(),
 		}
 		err = service.usedCodeRepo.CreateNewUsedCode(usedCode)
 		if err != nil {
@@ -203,9 +205,6 @@ func (service *authService) GetLoggedInUser(bearerToken string) utils.Response {
 			response.Data = nil
 			return response
 		}
-
-		response.StatusCode = 200
-		response.Messages = "success"
 		names := strings.Split(user.Fullname, " ")
 		if len(names) == 1 {
 			firstname = names[0]
@@ -222,6 +221,14 @@ func (service *authService) GetLoggedInUser(bearerToken string) utils.Response {
 				response.Data = nil
 				return response
 			}
+
+			if KodeGym.ExpiredAt.Before(time.Now()) {
+				response.StatusCode = 500
+				response.Messages = "Kode gym sudah expired"
+				response.Data = nil
+				return response
+			}
+
 			Gym, err := service.gymRepo.GetGymById(KodeGym.IdGym)
 			if err != nil {
 				response.StatusCode = 500
@@ -260,6 +267,8 @@ func (service *authService) GetLoggedInUser(bearerToken string) utils.Response {
 				"noTelepon":    user.NoTelepon,
 			}
 		}
+		response.StatusCode = 200
+		response.Messages = "success"
 		return response
 	} else {
 		response.StatusCode = 401

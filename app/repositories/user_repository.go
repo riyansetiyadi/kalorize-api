@@ -51,9 +51,23 @@ func (db *dbUser) UpdateUser(user models.User) error {
 	return nil
 }
 
+func (db *dbUser) GetAllUser() ([]models.User, error) {
+	var users []models.User
+	err := db.Conn.Find(&users).Error
+	return users, err
+}
+
+func (db *dbUser) DeleteUser(id uuid.UUID) error {
+	var user models.User
+	err := db.Conn.Where("id_user = ?", id).Delete(&user).Error
+	return err
+}
+
 type UserRepository interface {
 	GetToken() string
+	GetAllUser() ([]models.User, error)
 	CreateNewUser(user models.User) error
+	DeleteUser(id uuid.UUID) error
 	GetUserByUsername(username string) (models.User, error)
 	GetUserByEmail(email string) (models.User, error)
 	FindReferalCodeIfExist(code string) bool
