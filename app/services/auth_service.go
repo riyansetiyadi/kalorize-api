@@ -1,7 +1,6 @@
 package services
 
 import (
-	"fmt"
 	"kalorize-api/app/models"
 	"kalorize-api/app/repositories"
 	"kalorize-api/utils"
@@ -44,7 +43,6 @@ func (service *authService) Login(email, password string) utils.Response {
 		return response
 	}
 	if !utils.CheckPasswordHash(password, user.Password) {
-		fmt.Print(!utils.CheckPasswordHash(password, user.Password))
 		response.StatusCode = 401
 		response.Messages = "Password kamu salah"
 		response.Data = nil

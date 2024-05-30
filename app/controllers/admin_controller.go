@@ -154,9 +154,18 @@ func (controller *AdminController) RegisterUser(c echo.Context) error {
 	}
 	token := strings.TrimPrefix(authorizationHeader, "Bearer ")
 	type payload struct {
-		Email    string `json:"email" validate:"required,email"`
-		Password string `json:"password" validate:"required"`
-		Role     string `json:"role" validate:"required"`
+		Email        string `form:"email" validate:"required,email"`
+		FullName     string `form:"fullname" validate:"required"`
+		JenisKelamin int    `form:"jenis_kelamin" validate:"required"`
+		NoTelepon    string `form:"no_telepon" validate:"required"`
+		ReferalCode  string `form:"referal_code" validate:"required"`
+		Umur         int    `form:"umur" validate:"required"`
+		BeratBadan   int    `form:"berat_badan" validate:"required"`
+		TinggiBadan  int    `form:"tinggi_badan" validate:"required"`
+		FrekuensiGym int    `form:"frekuensi_gym" validate:"required"`
+		TargetKalori int    `form:"target_kalori" validate:"required"`
+		Password     string `form:"password" validate:"required"`
+		Role         string `form:"role" validate:"required"`
 	}
 	payloadValidator := new(payload)
 	if err := c.Bind(payloadValidator); err != nil {
@@ -165,12 +174,37 @@ func (controller *AdminController) RegisterUser(c echo.Context) error {
 	if err := controller.validate.Struct(payloadValidator); err != nil {
 		return c.JSON(400, err.Error())
 	}
-	var registerUserPayload utils.UserRequest = utils.UserRequest{
-		Email:    payloadValidator.Email,
-		Password: payloadValidator.Password,
-		Role:     payloadValidator.Role,
+
+	if err := c.Request().ParseMultipartForm(1024); err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
 	}
-	response := controller.adminService.RegisterUser(token, registerUserPayload)
+	alias := c.Request().FormValue("alias")
+	uploadedFile, handler, err := c.Request().FormFile("file")
+	if err != nil {
+		return c.JSON(400, err.Error())
+	}
+
+	photoRequest := utils.UploadedPhoto{
+		Alias:   alias,
+		File:    uploadedFile,
+		Handler: handler,
+	}
+
+	var registerUserPayload utils.UserRequest = utils.UserRequest{
+		Email:        payloadValidator.Email,
+		Password:     payloadValidator.Password,
+		Role:         payloadValidator.Role,
+		Fullname:     payloadValidator.FullName,
+		JenisKelamin: payloadValidator.JenisKelamin,
+		NoTelepon:    payloadValidator.NoTelepon,
+		ReferalCode:  payloadValidator.ReferalCode,
+		Umur:         payloadValidator.Umur,
+		BeratBadan:   payloadValidator.BeratBadan,
+		TinggiBadan:  payloadValidator.TinggiBadan,
+		FrekuensiGym: payloadValidator.FrekuensiGym,
+		TargetKalori: payloadValidator.TargetKalori,
+	}
+	response := controller.adminService.RegisterUser(token, registerUserPayload, photoRequest)
 	return c.JSON(response.StatusCode, response)
 }
 
@@ -228,9 +262,18 @@ func (controller *AdminController) UpdateUser(c echo.Context) error {
 	id := c.Param("id")
 	uuid := uuid.MustParse(id)
 	type payload struct {
-		Email    string `json:"email" validate:"required,email"`
-		Password string `json:"password" validate:"required"`
-		Role     string `json:"role" validate:"required"`
+		FullName     string `json:"fullname"`
+		Email        string `json:"email"`
+		NoTelepon    string `json:"noTelepon"`
+		Password     string `json:"password"`
+		JenisKelamin int    `json:"jenisKelamin"`
+		Umur         int    `json:"umur"`
+		BeratBadan   int    `json:"beratBadan"`
+		TinggiBadan  int    `json:"tinggiBadan"`
+		FrekuensiGym int    `json:"frekuensiGym"`
+		TargetKalori int    `json:"targetKalori"`
+		ReferalCode  string `json:"referalCode"`
+		Role         string `json:"role"`
 	}
 	payloadValidator := new(payload)
 	if err := c.Bind(payloadValidator); err != nil {

@@ -261,7 +261,7 @@ func (service *adminService) GenerateGymToken(bearerToken string, idGym uuid.UUI
 	return response
 }
 
-func (service *adminService) RegisterUser(bearerToken string, registerUserRequest utils.UserRequest) utils.Response {
+func (service *adminService) RegisterUser(bearerToken string, registerUserRequest utils.UserRequest, photoRequest utils.UploadedPhoto) utils.Response {
 	var response utils.Response
 	adminEmail, err := utils.ParseDataEmail(bearerToken)
 	if adminEmail == "" || err != nil {
@@ -299,6 +299,53 @@ func (service *adminService) RegisterUser(bearerToken string, registerUserReques
 		Password:     string(hashedPassword),
 		Role:         registerUserRequest.Role,
 	}
+
+	opt := option.WithCredentialsFile("config/credentials.json")
+	app, err := firebase.NewApp(context.Background(), nil, opt)
+	if err != nil {
+		response.StatusCode = 500
+		response.Messages = "Failed to initialize Firebase app"
+		response.Data = nil
+		return response
+	}
+
+	client, err := app.Storage(context.Background())
+	if err != nil {
+		response.StatusCode = 500
+		response.Messages = "Failed to initialize Firebase Storage client"
+		response.Data = nil
+		return response
+	}
+
+	storagePath := fmt.Sprintf("images/%s", registerUserRequest.Foto)
+	reader := strings.NewReader(registerUserRequest.Foto)
+	bucket, err := client.Bucket("kalorize-71324.appspot.com")
+	if err != nil {
+		response.StatusCode = 500
+		response.Messages = "Failed to get bucket handle from the client"
+		response.Data = nil
+		return response
+	}
+
+	wc := bucket.Object(storagePath).NewWriter(context.Background())
+	wc.ACL = []storage.ACLRule{{Entity: storage.AllUsers, Role: storage.RoleReader}}
+	if _, err := io.Copy(wc, reader); err != nil {
+		response.StatusCode = 500
+		response.Messages = "Failed to upload file to Firebase Storage"
+		response.Data = nil
+		return response
+	}
+
+	if err := wc.Close(); err != nil {
+		response.StatusCode = 500
+		response.Messages = "Failed to close Firebase Storage writer"
+		response.Data = nil
+		return response
+	}
+
+	user.Foto = registerUserRequest.Foto
+	user.FotoUrl = fmt.Sprintf("https://storage.googleapis.com/kalorize-71324.appspot.com/%s", storagePath)
+
 	err = service.userRepo.CreateNewUser(user)
 	if err != nil {
 		response.StatusCode = 500
@@ -405,9 +452,18 @@ func (service *adminService) UpdateUser(bearerToken string, id uuid.UUID, update
 		return response
 	}
 
+	user.Fullname = updateUserRequest.Fullname
 	user.Email = updateUserRequest.Email
 	user.Password = string(hashedPassword)
+	user.JenisKelamin = updateUserRequest.JenisKelamin
+	user.Umur = updateUserRequest.Umur
+	user.BeratBadan = updateUserRequest.BeratBadan
+	user.TinggiBadan = updateUserRequest.TinggiBadan
+	user.FrekuensiGym = updateUserRequest.FrekuensiGym
+	user.TargetKalori = updateUserRequest.TargetKalori
+	user.NoTelepon = updateUserRequest.NoTelepon
 	user.Role = updateUserRequest.Role
+
 	err = service.userRepo.UpdateUser(user)
 	if err != nil {
 		response.StatusCode = 500
@@ -454,7 +510,7 @@ type AdminService interface {
 	RegisterGym(bearerToken string, registGymRequest utils.GymRequest, photoRequest utils.UploadedPhoto) utils.Response
 	RegisterFranchise(bearerToken string, registFranchiseRequest utils.FranchiseRequest) utils.Response
 	RegisterMakanan(bearerToken string, registMakananRequest utils.MakananRequest) utils.Response
-	RegisterUser(bearerToken string, registerUserRequest utils.UserRequest) utils.Response
+	RegisterUser(bearerToken string, registerUserRequest utils.UserRequest, photoRequest utils.UploadedPhoto) utils.Response
 	GenerateGymToken(bearerToken string, idGym uuid.UUID) utils.Response
 	GetAllUser(bearerToken string) utils.Response
 	GetUserById(bearerToken string, id uuid.UUID) utils.Response

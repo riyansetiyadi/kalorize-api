@@ -139,7 +139,6 @@ func (service *userService) GetHistory(token string, date time.Time) utils.Respo
 	}
 
 	history, err := service.historyRepository.GetHistoryByIdUserAndDate(user.IdUser, date)
-	fmt.Print(history)
 	if err != nil {
 		return utils.Response{
 			StatusCode: 500,
