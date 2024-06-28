@@ -452,17 +452,45 @@ func (service *adminService) UpdateUser(bearerToken string, id uuid.UUID, update
 		return response
 	}
 
-	user.Fullname = updateUserRequest.Fullname
-	user.Email = updateUserRequest.Email
-	user.Password = string(hashedPassword)
-	user.JenisKelamin = updateUserRequest.JenisKelamin
-	user.Umur = updateUserRequest.Umur
-	user.BeratBadan = updateUserRequest.BeratBadan
-	user.TinggiBadan = updateUserRequest.TinggiBadan
-	user.FrekuensiGym = updateUserRequest.FrekuensiGym
-	user.TargetKalori = updateUserRequest.TargetKalori
-	user.NoTelepon = updateUserRequest.NoTelepon
-	user.Role = updateUserRequest.Role
+	if updateUserRequest.Email != "" {
+		user.Email = updateUserRequest.Email
+	}
+
+	if updateUserRequest.Fullname != "" {
+		user.Fullname = updateUserRequest.Fullname
+	}
+
+	if updateUserRequest.Umur != 0 {
+		user.Umur = updateUserRequest.Umur
+	}
+
+	if updateUserRequest.BeratBadan != 0 {
+		user.BeratBadan = updateUserRequest.BeratBadan
+	}
+
+	if updateUserRequest.TinggiBadan != 0 {
+		user.TinggiBadan = updateUserRequest.TinggiBadan
+	}
+
+	if updateUserRequest.FrekuensiGym < 4 && updateUserRequest.FrekuensiGym > -1 {
+		user.FrekuensiGym = updateUserRequest.FrekuensiGym
+	}
+
+	if updateUserRequest.TargetKalori < 4 && updateUserRequest.TargetKalori > -1 {
+		user.TargetKalori = updateUserRequest.TargetKalori
+	}
+
+	if updateUserRequest.NoTelepon != "" {
+		user.NoTelepon = updateUserRequest.NoTelepon
+	}
+
+	if updateUserRequest.Role != "" {
+		user.Role = updateUserRequest.Role
+	}
+
+	if updateUserRequest.Password != "" {
+		user.Password = string(hashedPassword)
+	}
 
 	err = service.userRepo.UpdateUser(user)
 	if err != nil {

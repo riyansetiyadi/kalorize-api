@@ -23,3 +23,9 @@ func GetAlphabetFromCode(code string) string {
 	}
 	return alphabet
 }
+
+func CheckGymLikeness(gymName string, gymCode string) bool {
+	//remove the number from gymCode
+	gymCode = GetAlphabetFromCode(gymCode)
+	return strings.Contains(strings.ToLower(gymName), strings.ToLower(gymCode))
+}

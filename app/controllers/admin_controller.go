@@ -262,18 +262,16 @@ func (controller *AdminController) UpdateUser(c echo.Context) error {
 	id := c.Param("id")
 	uuid := uuid.MustParse(id)
 	type payload struct {
-		FullName     string `json:"fullname"`
-		Email        string `json:"email"`
-		NoTelepon    string `json:"noTelepon"`
-		Password     string `json:"password"`
-		JenisKelamin int    `json:"jenisKelamin"`
-		Umur         int    `json:"umur"`
-		BeratBadan   int    `json:"beratBadan"`
-		TinggiBadan  int    `json:"tinggiBadan"`
-		FrekuensiGym int    `json:"frekuensiGym"`
-		TargetKalori int    `json:"targetKalori"`
-		ReferalCode  string `json:"referalCode"`
-		Role         string `json:"role"`
+		FullName     string `form:"fullname"`
+		Email        string `form:"email"`
+		NoTelepon    string `form:"noTelepon"`
+		Password     string `form:"password"`
+		Umur         int    `form:"umur"`
+		BeratBadan   int    `form:"beratBadan"`
+		TinggiBadan  int    `form:"tinggiBadan"`
+		FrekuensiGym int    `form:"frekuensiGym"`
+		TargetKalori int    `form:"targetKalori"`
+		Role         string `form:"role"`
 	}
 	payloadValidator := new(payload)
 	if err := c.Bind(payloadValidator); err != nil {
@@ -283,9 +281,16 @@ func (controller *AdminController) UpdateUser(c echo.Context) error {
 		return c.JSON(400, err.Error())
 	}
 	var updateUserPayload utils.UserRequest = utils.UserRequest{
-		Email:    payloadValidator.Email,
-		Password: payloadValidator.Password,
-		Role:     payloadValidator.Role,
+		Email:        payloadValidator.Email,
+		Password:     payloadValidator.Password,
+		Role:         payloadValidator.Role,
+		Fullname:     payloadValidator.FullName,
+		NoTelepon:    payloadValidator.NoTelepon,
+		Umur:         payloadValidator.Umur,
+		BeratBadan:   payloadValidator.BeratBadan,
+		TinggiBadan:  payloadValidator.TinggiBadan,
+		FrekuensiGym: payloadValidator.FrekuensiGym,
+		TargetKalori: payloadValidator.TargetKalori,
 	}
 	response := controller.adminService.UpdateUser(token, uuid, updateUserPayload)
 	return c.JSON(response.StatusCode, response)

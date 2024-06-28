@@ -150,6 +150,30 @@ func (service *authService) Register(registerRequest utils.UserRequest, gymKode 
 		Password:    string(hashedPassword),
 		Role:        registerRequest.Role,
 	}
+
+	gyms, err := service.gymRepo.GetGym()
+	if err != nil {
+		response.StatusCode = 500
+		response.Messages = "Gym tidak ditemukan"
+		response.Data = nil
+		return response
+	}
+
+	gymExist := false
+
+	for _, gym := range gyms {
+		if utils.CheckGymLikeness(gym.NamaGym, gymKode) {
+			gymExist = true
+		}
+	}
+
+	if !gymExist {
+		response.StatusCode = 500
+		response.Messages = "Code Gym tidak sesuai"
+		response.Data = nil
+		return response
+	}
+
 	if registerRequest.Role != "admin" {
 		gym, err := service.gymRepo.GetGymByGymName(utils.GetAlphabetFromCode(gymKode))
 		if err != nil {
