@@ -1,9 +1,10 @@
 package config
 
 import (
-	"database/sql"
 	"fmt"
-	"log"
+
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 type DatabaseConfig struct {
@@ -20,7 +21,7 @@ type Config struct {
 	Database DatabaseConfig `mapstructure:"database"`
 }
 
-func InitDB() (*sql.DB, error) {
+func InitDB() (*gorm.DB, error) {
 	// viper.SetConfigFile("prod.yaml")
 	// err := viper.ReadInConfig()
 	// if err != nil {
@@ -55,19 +56,10 @@ func InitDB() (*sql.DB, error) {
 	// 	return nil, fmt.Errorf("sql.Open: %w", err)
 	// }
 
-	dsn := "backend:development@tcp(35.240.213.210:3306)/kalorize"
-    db, err := sql.Open("mysql", dsn)
-    if err != nil {
-        log.Fatal(err)
-    }
-    defer db.Close()
-
-    err = db.Ping()
-    if err != nil {
-        log.Fatal(err)
-    }
+	dsn := "backend:development@tcp(35.240.213.210:3306)/kalorize?charset=utf8mb4&parseTime=True&loc=Local"
+    db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
     fmt.Println("Successfully connected to the database!")
 
-	return db, nil
+	return db, err
 }
