@@ -1,13 +1,9 @@
 package config
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
-	"net"
-
-	"cloud.google.com/go/cloudsqlconn"
-	"github.com/go-sql-driver/mysql"
+	"log"
 )
 
 type DatabaseConfig struct {
@@ -25,39 +21,53 @@ type Config struct {
 }
 
 func InitDB() (*sql.DB, error) {
-	viper.SetConfigFile("prod.yaml")
-	err := viper.ReadInConfig()
-	if err != nil {
-		return nil, fmt.Errorf("Error reading config file: %w", err)
-	}
+	// viper.SetConfigFile("prod.yaml")
+	// err := viper.ReadInConfig()
+	// if err != nil {
+	// 	return nil, fmt.Errorf("Error reading config file: %w", err)
+	// }
 
-	var config Config
-	err = viper.Unmarshal(&config)
-	if err != nil {
-		return nil, fmt.Errorf("Error unmarshalling config: %w", err)
-	}
+	// var config Config
+	// err = viper.Unmarshal(&config)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("Error unmarshalling config: %w", err)
+	// }
 
-	d, err := cloudsqlconn.NewDialer(context.Background())
-	if err != nil {
-		return nil, fmt.Errorf("cloudsqlconn.NewDialer: %w", err)
-	}
+	// d, err := cloudsqlconn.NewDialer(context.Background())
+	// if err != nil {
+	// 	return nil, fmt.Errorf("cloudsqlconn.NewDialer: %w", err)
+	// }
 
-	var opts []cloudsqlconn.DialOption
-	if config.Database.UsePrivate {
-		opts = append(opts, cloudsqlconn.WithPrivateIP())
-	}
+	// var opts []cloudsqlconn.DialOption
+	// if config.Database.UsePrivate {
+	// 	opts = append(opts, cloudsqlconn.WithPrivateIP())
+	// }
 
-	mysql.RegisterDialContext("cloudsqlconn", func(ctx context.Context, addr string) (net.Conn, error) {
-		return d.Dial(ctx, config.Database.InstanceConnectionName, opts...)
-	})
+	// mysql.RegisterDialContext("cloudsqlconn", func(ctx context.Context, addr string) (net.Conn, error) {
+	// 	return d.Dial(ctx, config.Database.InstanceConnectionName, opts...)
+	// })
 
-	dbURI := fmt.Sprintf("%s:%s@cloudsqlconn(localhost:%s)/%s?parseTime=true",
-		config.Database.Username, config.Database.Password, config.Database.Port, config.Database.DBName)
+	// dbURI := fmt.Sprintf("%s:%s@cloudsqlconn(localhost:%s)/%s?parseTime=true",
+	// 	config.Database.Username, config.Database.Password, config.Database.Port, config.Database.DBName)
 
-	db, err := sql.Open("mysql", dbURI)
-	if err != nil {
-		return nil, fmt.Errorf("sql.Open: %w", err)
-	}
+	// db, err := sql.Open("mysql", dbURI)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("sql.Open: %w", err)
+	// }
+
+	dsn := "backend:development@tcp(35.240.213.210:3306)/kalorize"
+    db, err := sql.Open("mysql", dsn)
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer db.Close()
+
+    err = db.Ping()
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    fmt.Println("Successfully connected to the database!")
 
 	return db, nil
 }
