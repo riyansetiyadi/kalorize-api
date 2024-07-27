@@ -10,13 +10,14 @@ require (
 	github.com/labstack/echo/v4 v4.11.4
 	github.com/spf13/viper v1.18.2
 	google.golang.org/api v0.188.0
-	gorm.io/driver/mysql v1.5.2
+	gorm.io/driver/mysql v1.5.7
 )
 
 require (
 	cloud.google.com/go/auth v0.7.0 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.2 // indirect
 	cloud.google.com/go/cloudsqlconn v1.11.1 // indirect
+	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 )
 
@@ -92,5 +93,5 @@ require (
 	golang.org/x/net v0.27.0 // indirect
 	golang.org/x/sys v0.22.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
-	gorm.io/gorm v1.25.5
+	gorm.io/gorm v1.25.11
 )

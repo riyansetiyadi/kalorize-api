@@ -7,7 +7,12 @@ import (
 )
 
 func main() {
-	db := config.InitDB()
+	db, err := config.InitDB()
+
+	if err != nil {
+        fmt.Println("Error connecting to database:", err)
+        return
+    }
 	config.AutoMigration(db)
 
 	// Route
