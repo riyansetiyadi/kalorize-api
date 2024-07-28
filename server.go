@@ -28,7 +28,7 @@ func main() {
 	routes.RouteGym(route, db)
 
 	// Start server
-	port := 80
+	port := 8080
 	address := fmt.Sprintf("0.0.0.0:%d", port)
 	e.Logger.Fatal(e.Start(address))
 }
