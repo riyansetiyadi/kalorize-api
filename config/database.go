@@ -56,7 +56,7 @@ func InitDB() (*gorm.DB, error) {
 	// 	return nil, fmt.Errorf("sql.Open: %w", err)
 	// }
 
-	dsn := "kalorize:JyCtr3xL4nXNRKxW@tcp(35.240.213.210:3306)/kalorize?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := "kalorize:JyCtr3xL4nXNRKxW@tcp(33.124.249.129:3306)/kalorize?charset=utf8mb4&parseTime=True&loc=Local"
     db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
     fmt.Println("Successfully connected to the database!")
